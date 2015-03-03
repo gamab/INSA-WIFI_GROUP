@@ -8,17 +8,28 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
 
 public class ConnectActivity extends ActionBarActivity {
 
     private static final String TAG = "ConnectActivity";
 
     private Button mConnectBtn;
+    private Button mDisconnectBtn;
+
+    private int netId;
+
+    private WifiManager wifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.connect_layout);
+
+        wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
 
         mConnectBtn = (Button) findViewById(R.id.btn_connect);
         mConnectBtn.setOnClickListener(new View.OnClickListener() {
@@ -29,20 +40,29 @@ public class ConnectActivity extends ActionBarActivity {
                 Connect();
             }
         });
+
+        mDisconnectBtn = (Button) findViewById(R.id.btn_disconnect);
+        mDisconnectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Here put the connection code
+                Log.d(TAG,"Click sur le bouton Disconnect");
+                Disconnect();
+            }
+        });
     }
 
 
     public void Connect() {
-        String networkSSID = "Yann Mb";
-        String networkPass = "12345_wifi";
+        String networkSSID = "JCsWiFi";
+        String networkPass = "MDPCACHE";
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", networkSSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", networkPass);
         Log.d(TAG,"Configure wifi config (" + networkSSID + " | " + networkPass + ")");
 
-        WifiManager wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
         //remember id
-        int netId = wifiManager.addNetwork(wifiConfig);
+        netId = wifiManager.addNetwork(wifiConfig);
         Log.d(TAG,"Disconnecting");
         wifiManager.disconnect();
         Log.d(TAG,"Enabling network");
@@ -51,5 +71,14 @@ public class ConnectActivity extends ActionBarActivity {
         wifiManager.reconnect();
     }
 
+    public void Disconnect() {
+        String networkSSID = "JCsWiFi";
+        Log.d(TAG,"Get rid of wifi config (" + networkSSID + " | )");
+
+        Log.d(TAG,"Disconnecting");
+        wifiManager.disconnect();
+        Log.d(TAG,"Removing Network");
+        wifiManager.removeNetwork(this.netId);
+    }
 
 }

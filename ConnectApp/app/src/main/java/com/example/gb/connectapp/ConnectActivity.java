@@ -55,7 +55,7 @@ public class ConnectActivity extends ActionBarActivity {
 
     public void Connect() {
         String networkSSID = "JCsWiFi";
-        String networkPass = "MDPCACHE";
+        String networkPass = "MDP genial";
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", networkSSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", networkPass);

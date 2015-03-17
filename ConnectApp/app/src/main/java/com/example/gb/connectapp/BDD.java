@@ -37,15 +37,10 @@ public class BDD extends SQLiteOpenHelper{
                 + NetworkTable.PresharedKey + " TEXT);");
 
         // CREATE Network TABLE
-        Log.w("====>CREATE QoS TABLE"," with ID="+QosTable.ID+"  BP="+QosTable.Bande_Passante+"  Debit="+QosTable.Debit+"  Gigue="+QosTable.Gigue+"  Note="+QosTable.Note+"  Position="+QosTable.Position+"  RTT="+QosTable.RTT+"  Taux_P="+QosTable.Taux_Perte_P+"!!");
+        Log.w("====>CREATE QoS TABLE"," with ID="+QosTable.ID+"  Note="+QosTable.Note+"  TimeStamp="+QosTable.Time+"!!");
         db.execSQL("CREATE TABLE " + QosTable.TABLE_NAME + " (" + QosTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + QosTable.Bande_Passante + " REAL,"
-                + QosTable.Debit + " REAL,"
-                + QosTable.Gigue + " Integer,"
                 + QosTable.Note + " Integer,"
-                + QosTable.Position + " TEXT,"
-                + QosTable.RTT + " REAL,"
-                + QosTable.Taux_Perte_P + " REAL);");
+                + QosTable.Time + " TEXT);");
 
         // CREATE Join MAPPING TABLE
         Log.w("====>CREATE Join MAPPING TABLE"," with ID="+Join.ID+"  Network_ID="+Join.Network_ID+"  Qos_ID="+Join.Qos_ID+"!!");
@@ -67,7 +62,7 @@ public class BDD extends SQLiteOpenHelper{
 
     public void deleteEverything() {
         SQLiteDatabase db = getWritableDatabase();
-        onUpgrade(db,0,1);
+        onUpgrade(db,1,2);
         //onCreate(db);
     }
 
@@ -92,17 +87,12 @@ public class BDD extends SQLiteOpenHelper{
     }
     // WRAPPER METHOD FOR ADDING A Qos
     @SuppressLint("LongLogTag")
-    public long addQos(String bp,String debit, String gigue, String note, String position, String rTT, String taux)
+    public long addQos(String note, String time)
     {
-        Log.w("====>WRAPPER METHOD FOR ADDING A Qos"," with BP="+bp+"  Debit="+debit+"  Gigue="+gigue+"  Note="+note+"  Position="+position+"  RTT="+rTT+"  Taux="+taux+"!!");
+        Log.w("====>WRAPPER METHOD FOR ADDING A Qos"," with Note="+note+"  Time="+time+"!!");
         ContentValues cv = new ContentValues();
-        cv.put(QosTable.Bande_Passante, bp);
-        cv.put(QosTable.Debit, debit);
-        cv.put(QosTable.Gigue, gigue);
         cv.put(QosTable.Note, note);
-        cv.put(QosTable.Position, position);
-        cv.put(QosTable.RTT, rTT);
-        cv.put(QosTable.Taux_Perte_P, taux);
+        cv.put(QosTable.Time, time);
         SQLiteDatabase sd = getWritableDatabase();
         long result = sd.insert(QosTable.TABLE_NAME,null, cv);
         return result;
@@ -121,33 +111,40 @@ public class BDD extends SQLiteOpenHelper{
         return (result >= 0);
     }
 
-    // GET ALL Settings Qos IN A Network
+    // GET ALL Settings Qos of one Network
     @SuppressLint("LongLogTag")
-    public Cursor getSettingsForNetwork(int netId)
+    public void getSettingsForNetwork(int netId)
     {
         SQLiteDatabase sd = getWritableDatabase();
-        // WE ONLY NEED TO RETURN Qos IDS
-        String[] cols = new String[] { Join.Qos_ID };
-        String[] selectionArgs = new String[] {
-                String.valueOf(netId) };
-        // QUERY CLASS MAP FOR Settings Qos IN Network
-        Cursor c = sd.query(Join.TABLE_NAME, cols,Join.Network_ID + "= ?", selectionArgs, null,null, null);
-        Log.w("====>GET ALL Settings Qos IN A Network",c+"!!");
-        return c;
+
+        Cursor cursor = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.ID+"="+netId,null);
+        Cursor cursor2 = sd.rawQuery("SELECT "+Join.Qos_ID+" FROM " + Join.TABLE_NAME+" WHERE "+Join.Network_ID+"="+netId,null);
+        Cursor cursor3 = sd.rawQuery("SELECT * FROM " + QosTable.TABLE_NAME+" WHERE "+QosTable.ID+"="+cursor2.getString(0),null);
+
+        while (cursor3.moveToNext()) {
+            Log.w("GET ALL Settings Qos of one Network","SSID= "+cursor.getString(1) + "-- Note= " + cursor3.getString(1) + "-- Time= " + cursor3.getString(2));
+        }
+        cursor.close();
+        cursor2.close();
+        cursor3.close();
     }
 
     // GET ALL Networks FOR A GIVEN setting Qos
     @SuppressLint("LongLogTag")
-    public Cursor getNetworkForQos(int qosId)
+    public void getNetworkForQos(int qosId)
     {
         SQLiteDatabase sd = getWritableDatabase();
-        // WE ONLY NEED TO RETURN COURSE IDS
-        String[] cols = new String[] { Join.Network_ID };
-        String[] selectionArgs = new String[] {
-                String.valueOf(qosId) };
-        Cursor c = sd.query(Join.TABLE_NAME, cols,Join.Qos_ID + "= ?", selectionArgs, null,null, null);
-        Log.w("====>GET ALL Networks FOR A GIVEN setting Qos",c+"!!");
-        return c;
+
+        Cursor cursor = sd.rawQuery("SELECT * FROM " + QosTable.TABLE_NAME+" WHERE "+QosTable.ID+"="+qosId,null);
+        Cursor cursor2 = sd.rawQuery("SELECT "+Join.Network_ID+" FROM " + Join.TABLE_NAME+" WHERE "+Join.Qos_ID+"="+qosId,null);
+        Cursor cursor3 = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.ID+"="+cursor2.getString(0),null);
+
+        while (cursor3.moveToNext()) {
+            Log.w("GET ALL Networks FOR A GIVEN setting Qos","Note= "+cursor.getString(1) + "-- Time= " + cursor.getString(2) + "-- SSID= " + cursor3.getString(1));
+        }
+        cursor.close();
+        cursor2.close();
+        cursor3.close();
     }
 
     public Set<Integer> getSettingQosByNoteForNetwork(int netId,int note)

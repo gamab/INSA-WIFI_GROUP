@@ -49,8 +49,8 @@ public class ConnectActivity extends ActionBarActivity {
                 long net2 = Association_Liste_reseau("GabMab", "12345_wifi");
                 long net1 = Association_Liste_reseau("Yann Mb", "12345_wifi");
                 // ADD Qos AND RETURN THEIR IDS
-                long qos1 = Evaluation_Reseau(net1, "10", "10000", "10", "15", "Toulouse", "2.5", "0.2");
-                long qos2 = Evaluation_Reseau(net2, "10", "10000", "10", "19", "Narbonne", "2.5", "0.2");
+                long qos1 = Evaluation_Reseau(net1, "5", "10:00:00");
+                long qos2 = Evaluation_Reseau(net2, "4", "10:00:00");
 
                 /*
                 while (true) {
@@ -141,11 +141,11 @@ public class ConnectActivity extends ActionBarActivity {
         }
     }
 
-    public long Evaluation_Reseau(long netID, String bP,String debit, String gigue, String note, String position, String rTT, String taux)
+    public long Evaluation_Reseau(long netID, String note, String time)
     {
         Log.d(TAG,"********** Evaluation_Reseau");
         // ADD Qos AND RETURN THEIR IDS
-        long qos = sh.addQos(bP,debit, gigue,note,position,rTT,taux);
+        long qos = sh.addQos(note,time);
         // ENROLL Networks IN Qos
         sh.enrollSettingClass((int) netID,(int) qos);
 
@@ -156,13 +156,7 @@ public class ConnectActivity extends ActionBarActivity {
     {
         Log.d(TAG,"********** FONCTION Visualisation_Parametres_Qos_reseau");
         // GET Qos FOR network
-        Cursor c = sh.getSettingsForNetwork((int) netID);
-        while (c.moveToNext())
-        {
-            int colid = c.getColumnIndex(Join.Qos_ID);
-            int sid = c.getInt(colid);
-            System.out.println("Setting Qos " + sid + " IS ENROLLED IN Network " + netID);
-        }
+        sh.getSettingsForNetwork((int) netID);
     }
 
     public int TimeStamp_Insa()

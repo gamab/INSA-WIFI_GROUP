@@ -1,5 +1,6 @@
 package com.example.gb.connectapp;
 
+import android.database.Cursor;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.ActionBarActivity;
@@ -9,8 +10,10 @@ import android.view.View;
 import android.widget.Button;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 
 public class ConnectActivity extends ActionBarActivity {
@@ -21,6 +24,8 @@ public class ConnectActivity extends ActionBarActivity {
     private Button mDisconnectBtn;
 
     private int netId;
+
+    private BDD sh = new BDD(this);
 
     private WifiManager wifiManager;
 
@@ -36,8 +41,26 @@ public class ConnectActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //Here put the connection code
-                Log.d(TAG,"Click sur le bouton Connect");
-                Connect();
+                Log.d(TAG, "Click sur le bouton Connect");
+                //Connect(networkSSID ,networkPass);
+
+                sh.deleteEverything();
+                // ADD Networks AND RETURN THEIR IDS
+                long net2 = Association_Liste_reseau("GabMab", "12345_wifi");
+                long net1 = Association_Liste_reseau("Yann Mb", "12345_wifi");
+                // ADD Qos AND RETURN THEIR IDS
+                long qos1 = Evaluation_Reseau(net1, "10", "10000", "10", "15", "Toulouse", "2.5", "0.2");
+                long qos2 = Evaluation_Reseau(net2, "10", "10000", "10", "19", "Narbonne", "2.5", "0.2");
+
+                /*
+                while (true) {
+                    if (TimeStamp_Insa() != 0) {
+                        Connect("Insa", "12345_wifi");
+                    } else if (TimeStamp_edurom() != 0) {
+                        Connect("Edurom", "12345_wifi");
+                    }
+                }
+                */
             }
         });
 
@@ -52,6 +75,23 @@ public class ConnectActivity extends ActionBarActivity {
         });
     }
 
+    public void Connect(String networkSSID ,String networkPass) {
+        Log.d(TAG,"********** FONCTION CONNECT");
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.SSID = String.format("\"%s\"", networkSSID);
+        wifiConfig.preSharedKey = String.format("\"%s\"", networkPass);
+        Log.d(TAG,"Configure wifi config (" + networkSSID + " | " + networkPass + ")");
+
+        WifiManager wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
+        //remember id
+        netId = wifiManager.addNetwork(wifiConfig);
+        Log.d(TAG,"Disconnecting");
+        wifiManager.disconnect();
+        Log.d(TAG,"Enabling network");
+        wifiManager.enableNetwork(netId, true);
+        Log.d(TAG,"Connecting");
+        wifiManager.reconnect();
+    }
 
     public void Connect() {
         String networkSSID = "JCsWifi2";
@@ -81,4 +121,74 @@ public class ConnectActivity extends ActionBarActivity {
         wifiManager.removeNetwork(this.netId);
     }
 
+    public long Association_Liste_reseau(String networkSSID ,String networkPass)
+    {
+        Log.d(TAG,"********** FONCTION Association_Liste_reseau");
+        // ADD Networks AND RETURN THEIR IDS
+        long net = sh.addNetwork(networkSSID, networkPass);
+        //Connect(networkSSID, networkPass);
+
+        return net;
+    }
+
+    public void Classement_Reseau_par_Note(long netID ,int Note)
+    {
+        Log.d(TAG,"********** FONCTION Classement_Reseau_par_Note");
+        // GET Qos Note FOR Networks AND FILTER BY Note
+        Set<Integer> sids = sh.getSettingQosByNoteForNetwork((int) netID, Note);
+        for (Integer sid : sids) {
+            System.out.println("Qos Setting " + sid + " OF GRADE "+Note+" IS ENROLLED IN Network " + netID);
+        }
+    }
+
+    public long Evaluation_Reseau(long netID, String bP,String debit, String gigue, String note, String position, String rTT, String taux)
+    {
+        Log.d(TAG,"********** Evaluation_Reseau");
+        // ADD Qos AND RETURN THEIR IDS
+        long qos = sh.addQos(bP,debit, gigue,note,position,rTT,taux);
+        // ENROLL Networks IN Qos
+        sh.enrollSettingClass((int) netID,(int) qos);
+
+        return qos;
+    }
+
+    public void Visualisation_Parametres_Qos_reseau(long netID )
+    {
+        Log.d(TAG,"********** FONCTION Visualisation_Parametres_Qos_reseau");
+        // GET Qos FOR network
+        Cursor c = sh.getSettingsForNetwork((int) netID);
+        while (c.moveToNext())
+        {
+            int colid = c.getColumnIndex(Join.Qos_ID);
+            int sid = c.getInt(colid);
+            System.out.println("Setting Qos " + sid + " IS ENROLLED IN Network " + netID);
+        }
+    }
+
+    public int TimeStamp_Insa()
+    {
+        Log.d(TAG,"********** FONCTION TimeStamp_Insa");
+        String time=java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
+        if(time.equals("16:45:00"))
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    public int TimeStamp_edurom()
+    {
+        String time=java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
+        if("16:46:00"==time)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 }

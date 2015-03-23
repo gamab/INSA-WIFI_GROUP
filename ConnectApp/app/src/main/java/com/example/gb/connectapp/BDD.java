@@ -129,6 +129,48 @@ public class BDD extends SQLiteOpenHelper{
         cursor3.close();
     }
 
+
+    // GET ALL Network by mark
+    @SuppressLint("LongLogTag")
+    public String getNetworkByMark()
+    {
+        SQLiteDatabase sd = getWritableDatabase();
+        int Note=0;
+        String SSID="";
+
+        Cursor cursor2 = sd.rawQuery("SELECT * FROM " + Join.TABLE_NAME,null);
+        while (cursor2.moveToNext()) {
+            Cursor cursor3 = sd.rawQuery("SELECT "+QosTable.Note+" FROM " + QosTable.TABLE_NAME+" WHERE "+QosTable.ID+"="+cursor2.getString(2),null);
+            Cursor cursor = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.ID+"="+cursor2.getString(1),null);
+            if(Integer.parseInt(cursor3.getString(0)) >= Note)
+            {
+               SSID= cursor.getString(1);
+               Note=Integer.parseInt(cursor3.getString(0));
+            }
+            Log.w("GET NETWORK BY MARK","SSID= "+cursor.getString(1) + "-- Note= " + cursor3.getString(0));
+            cursor.close();
+            cursor3.close();
+        }
+        cursor2.close();
+        return SSID;
+    }
+
+
+    // GET ALL Network by mark
+    @SuppressLint("LongLogTag")
+    public String getPresharKeyBySSID(String ssid)
+    {
+        SQLiteDatabase sd = getWritableDatabase();
+
+        String Key="";
+        Cursor cursor2 = sd.rawQuery("SELECT "+NetworkTable.PresharedKey+" FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.SSID+"="+ssid,null);
+
+        cursor2.close();
+        return Key;
+    }
+
+
+
     // GET ALL Networks FOR A GIVEN setting Qos
     @SuppressLint("LongLogTag")
     public void getNetworkForQos(int qosId)

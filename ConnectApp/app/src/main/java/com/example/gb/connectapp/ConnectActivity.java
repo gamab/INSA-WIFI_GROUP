@@ -43,14 +43,18 @@ public class ConnectActivity extends ActionBarActivity {
                 //Here put the connection code
                 Log.d(TAG, "Click sur le bouton Connect");
                 //Connect(networkSSID ,networkPass);
-
                 sh.deleteEverything();
+
                 // ADD Networks AND RETURN THEIR IDS
-                long net2 = Association_Liste_reseau("GabMab", "12345_wifi");
-                long net1 = Association_Liste_reseau("Yann Mb", "12345_wifi");
+                long net2 = Ajout_Reseau_BDD("GabMab", "12345_wifi");
+                long net1 = Ajout_Reseau_BDD("Yann Mb", "12345_wifi");
+
                 // ADD Qos AND RETURN THEIR IDS
-                long qos1 = Evaluation_Reseau(net1, "5", "10:00:00");
-                long qos2 = Evaluation_Reseau(net2, "4", "10:00:00");
+                long qos1 = Evaluation_Reseau(net1, "5", "16:00:00");
+                long qos2 = Evaluation_Reseau(net2, "4", "17:00:00");
+
+                String ssid=sh.getNetworkByMark();
+                Connect(ssid, sh.getPresharKeyBySSID(ssid));
 
                 /*
                 while (true) {
@@ -121,7 +125,7 @@ public class ConnectActivity extends ActionBarActivity {
         wifiManager.removeNetwork(this.netId);
     }
 
-    public long Association_Liste_reseau(String networkSSID ,String networkPass)
+    public long Ajout_Reseau_BDD(String networkSSID ,String networkPass)
     {
         Log.d(TAG,"********** FONCTION Association_Liste_reseau");
         // ADD Networks AND RETURN THEIR IDS
@@ -135,10 +139,7 @@ public class ConnectActivity extends ActionBarActivity {
     {
         Log.d(TAG,"********** FONCTION Classement_Reseau_par_Note");
         // GET Qos Note FOR Networks AND FILTER BY Note
-        Set<Integer> sids = sh.getSettingQosByNoteForNetwork((int) netID, Note);
-        for (Integer sid : sids) {
-            System.out.println("Qos Setting " + sid + " OF GRADE "+Note+" IS ENROLLED IN Network " + netID);
-        }
+
     }
 
     public long Evaluation_Reseau(long netID, String note, String time)

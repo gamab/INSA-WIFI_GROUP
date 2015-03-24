@@ -1,6 +1,12 @@
 CREATE DATABASE ConnectApp;
 USE ConnectApp;
 
+
+drop table jointure;
+drop table network;
+drop table qos;
+
+
 Create table network (
 id INTEGER NOT NULL AUTO_INCREMENT,
 SSID VARCHAR(40) NOT NULL,
@@ -24,20 +30,20 @@ foreign key (id_n) REFERENCES network(id),
 foreign key (id_q) REFERENCES qos(id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
-drop table jointure;
-
-
 insert into network (SSID,PKEY) values 
-("GIFI","GABI123"),
-("JCWIFI","JC123");
+("GabMab","wifi_12345"),
+("JCWIFI","JC123"),
+("Yann Mb","wifi_12345");
 
 insert into qos (Note,Timestp) values
 (13,"12:00"),
-(15,"13:00");
+(15,"13:00"),
+(17,"12:00");
 
 insert into jointure (id_n,id_q) values
 (1,1),
-(2,2);
+(2,2),
+(3,3);
 
 Select * from network;
 Select * from qos;
@@ -46,3 +52,8 @@ Select * from jointure;
 Select network.SSID, qos.note, network.PKEY
 FROM network natural join jointure natural join qos
 order by qos.note DESC;
+
+Select network.SSID, qos.note, network.PKEY
+FROM network natural join jointure natural join qos
+WHERE network.SSID = "GabMab" OR network.SSID = "JCWIFI"
+ORDER BY qos.note DESC;

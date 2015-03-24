@@ -59,6 +59,8 @@ public class ConnectActivity extends ActionBarActivity {
                 Log.d(TAG,"Best network is : SSID : " + nd.getmName() + " PKEY : " + nd.getmPass());
 
                 Connect(nd.getmName(),nd.getmPass());
+                sh.printDatabase();
+
                 /*
                 while (true) {
                     if (TimeStamp_Insa() != 0) {
@@ -155,31 +157,12 @@ public class ConnectActivity extends ActionBarActivity {
         return qos;
     }
 
-    public void Visualisation_Parametres_Qos_reseau(long netID )
-    {
-        Log.d(TAG,"********** FONCTION Visualisation_Parametres_Qos_reseau");
-        // GET Qos FOR network
-        sh.getSettingsForNetwork((int) netID);
-    }
 
     public int TimeStamp_Insa()
     {
         Log.d(TAG,"********** FONCTION TimeStamp_Insa");
         String time=java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
         if(time.equals("16:45:00"))
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    public int TimeStamp_edurom()
-    {
-        String time=java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
-        if("16:46:00"==time)
         {
             return 1;
         }

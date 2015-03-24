@@ -21,6 +21,9 @@ public class BDD extends SQLiteOpenHelper{
     private static final int DATABASE_VERSION = 1;
 
     private static final String TAG = "BDD";
+    private static final String TAG1 = "Network --";
+    private static final String TAG2 = "Qos --";
+    private static final String TAG3 = "Jointure --";
 
     BDD(Context context)
     {
@@ -82,7 +85,7 @@ public class BDD extends SQLiteOpenHelper{
         long result = sd.insert(NetworkTable.TABLE_NAME,null, cv);
         Cursor cursor = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME,null);
         while (cursor.moveToNext()) {
-            Log.d(TAG,cursor.getString(0) + " " + cursor.getString(1) + " " + cursor.getString(2));
+            Log.d(TAG1,cursor.getString(0) + " " + cursor.getString(1) + " " + cursor.getString(2));
         }
         cursor.close();
         return result;
@@ -97,6 +100,10 @@ public class BDD extends SQLiteOpenHelper{
         cv.put(QosTable.Time, time);
         SQLiteDatabase sd = getWritableDatabase();
         long result = sd.insert(QosTable.TABLE_NAME,null, cv);
+        Cursor cursor = sd.rawQuery("SELECT * FROM " + QosTable.TABLE_NAME,null);
+        while (cursor.moveToNext()) {
+            Log.d(TAG2,cursor.getString(0) + " " + cursor.getString(1) + " " + cursor.getString(2));
+        }
         return result;
     }
 
@@ -110,67 +117,43 @@ public class BDD extends SQLiteOpenHelper{
         cv.put(Join.Qos_ID, qosId);
         SQLiteDatabase sd = getWritableDatabase();
         long result = sd.insert(Join.TABLE_NAME,Join.Qos_ID, cv);
+        Cursor cursor = sd.rawQuery("SELECT * FROM " + Join.TABLE_NAME,null);
+        while (cursor.moveToNext()) {
+            Log.d(TAG3,cursor.getString(0) + " " + cursor.getString(1) + " " + cursor.getString(2));
+        }
         return (result >= 0);
     }
 
     // GET ALL Settings Qos of one Network
     @SuppressLint("LongLogTag")
-    public void getSettingsForNetwork(int netId)
+    public void printDatabase()
     {
         SQLiteDatabase sd = getWritableDatabase();
 
-        Cursor cursor = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.ID+"="+netId,null);
-        Cursor cursor2 = sd.rawQuery("SELECT "+Join.Qos_ID+" FROM " + Join.TABLE_NAME+" WHERE "+Join.Network_ID+"="+netId,null);
-        Cursor cursor3 = sd.rawQuery("SELECT * FROM " + QosTable.TABLE_NAME+" WHERE "+QosTable.ID+"="+cursor2.getString(0),null);
+        String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "," +
+                        NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
+                        NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ","+
+                        QosTable.TABLE_NAME + "." + QosTable.ID + ","+
+                        QosTable.TABLE_NAME + "." + QosTable.Note + ","+
+                        QosTable.TABLE_NAME + "." + QosTable.Time ;
 
-        while (cursor3.moveToNext()) {
-            Log.w("GET ALL Settings Qos of one Network","SSID= "+cursor.getString(1) + "-- Note= " + cursor3.getString(1) + "-- Time= " + cursor3.getString(2));
+        query += "FROM " + NetworkTable.TABLE_NAME
+                + " NATURAL JOIN " + Join.TABLE_NAME
+                + " NATURAL JOIN " + QosTable.TABLE_NAME
+                + " ";
+
+        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
+
+        Cursor cursor = sd.rawQuery(query,null);
+        Log.w("Database ", "ID_Network      ||   SSID     ||  Presharedkey    ||  ID_Qos    ||  Note   ||   Timestamp ");
+        while (cursor.moveToNext()) {
+
+            Log.w("Database ",  cursor.getString(0)+"      ||   "+cursor.getString(1)+"     ||  "+cursor.getString(2)+"    ||  "+cursor.getString(3)+"    ||  "+cursor.getString(4)+"   ||   "+cursor.getString(5)+" ");
         }
         cursor.close();
-        cursor2.close();
-        cursor3.close();
     }
-
 
     // GET ALL Network by mark
-    @SuppressLint("LongLogTag")
-    public String getNetworkByMark()
-    {
-        SQLiteDatabase sd = getWritableDatabase();
-        int Note=0;
-        int i=0;
-        String SSID="";
-
-       /* Cursor cursor2 = sd.rawQuery("SELECT * FROM " + Join.TABLE_NAME,null);
-        while (cursor2.moveToNext()) {
-            Cursor cursor3 = sd.rawQuery("SELECT "+QosTable.Note+" FROM " + QosTable.TABLE_NAME+" WHERE "+QosTable.ID+"="+cursor2.getString(2),null);
-            Cursor cursor = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.ID+"="+cursor2.getString(1),null);
-            if(Integer.parseInt(cursor3.getString(0)) >= Note)
-            {
-               SSID= cursor.getString(1);
-               Note=Integer.parseInt(cursor3.getString(0));
-            }
-            Log.w("GET NETWORK BY MARK","SSID= "+cursor.getString(1) + "-- Note= " + cursor3.getString(0));
-            cursor.close();
-            cursor3.close();
-        }
-        cursor2.close();*/
-        Cursor cursor = sd.rawQuery("SELECT "+NetworkTable.SSID+", "+QosTable.Note+" FROM " + NetworkTable.TABLE_NAME+" natural join "+Join.TABLE_NAME+" natural join "+QosTable.TABLE_NAME+ " order by "+QosTable.Note+" DESC",null);
-        while (cursor.moveToNext())
-        {
-            if(i<1)
-            {
-                SSID= cursor.getString(0);
-                Note = cursor.getInt(1);
-            }
-            i++;
-            Log.w("GET NETWORK BY MARK","SSID= "+cursor.getString(0) + "-- Note= " + cursor.getString(1));
-        }
-        cursor.close();
-        Log.w("Meilleur Reseau ==> ","SSID= "+SSID + "-- Note= " + Note);
-        return SSID;
-    }
-
     @SuppressLint("LongLogTag")
     public NetworkDesc getNetworkByNote()
     {
@@ -195,72 +178,9 @@ public class BDD extends SQLiteOpenHelper{
     }
 
 
-    // GET ALL Network by mark
-    @SuppressLint("LongLogTag")
-    public String getPresharKeyBySSID(String ssid)
-    {
-        SQLiteDatabase sd = getWritableDatabase();
-
-        String Key="";
-        Cursor cursor2 = sd.rawQuery("SELECT "+NetworkTable.PresharedKey+" FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.SSID+"="+ssid,null);
-        if(cursor2.moveToNext())
-        {
-            Key =cursor2.getString(0);
-        }
-        cursor2.close();
-        return Key;
-    }
 
 
 
-    // GET ALL Networks FOR A GIVEN setting Qos
-    @SuppressLint("LongLogTag")
-    public void getNetworkForQos(int qosId)
-    {
-        SQLiteDatabase sd = getWritableDatabase();
-
-        Cursor cursor = sd.rawQuery("SELECT * FROM " + QosTable.TABLE_NAME+" WHERE "+QosTable.ID+"="+qosId,null);
-        Cursor cursor2 = sd.rawQuery("SELECT "+Join.Network_ID+" FROM " + Join.TABLE_NAME+" WHERE "+Join.Qos_ID+"="+qosId,null);
-        Cursor cursor3 = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.ID+"="+cursor2.getString(0),null);
-
-        while (cursor3.moveToNext()) {
-            Log.w("GET ALL Networks FOR A GIVEN setting Qos","Note= "+cursor.getString(1) + "-- Time= " + cursor.getString(2) + "-- SSID= " + cursor3.getString(1));
-        }
-        cursor.close();
-        cursor2.close();
-        cursor3.close();
-    }
-
-    public Set<Integer> getSettingQosByNoteForNetwork(int netId,int note)
-    {
-        SQLiteDatabase sd = getWritableDatabase();
-        // WE ONLY NEED TO RETURN COURSE IDS
-        String[] cols = new String[] { Join.Qos_ID };
-        String[] selectionArgs = new String[] {
-                String.valueOf(netId) };
-        // QUERY CLASS MAP FOR STUDENTS IN COURSE
-        Cursor c = sd.query(Join.TABLE_NAME, cols,Join.Network_ID + "= ?", selectionArgs, null,null, null);
-        Set<Integer> returnIds = new HashSet<Integer>();
-        while (c.moveToNext())
-        {
-            int id = c.getInt(c.getColumnIndex
-                    (Join.Qos_ID));
-            returnIds.add(id);
-        }
-
-        // MAKE SECOND QUERY
-        cols = new String[] { QosTable.ID };
-        selectionArgs = new String[] { String.valueOf(note) };
-        c = sd.query(QosTable.TABLE_NAME, cols,QosTable.Note + "= ?", selectionArgs, null, null, null);
-        Set<Integer> gradeIds = new HashSet<Integer>();
-        while (c.moveToNext()) {
-            int id = c.getInt(c.getColumnIndex(QosTable.ID));
-            gradeIds.add(id);
-        }
-        // RETURN INTERSECTION OF ID SETS
-        returnIds.retainAll(gradeIds);
-        return returnIds;
-    }
 
     // METHOD FOR SAFELY REMOVING A Setting Qos
     @SuppressLint("LongLogTag")
@@ -274,10 +194,14 @@ public class BDD extends SQLiteOpenHelper{
                 };
         // DELETE ALL CLASS MAPPINGS Setting Qos IS SIGNED UP FOR
         sd.delete(Join.TABLE_NAME, Join.Qos_ID + "= ? ", whereArgs);
-        // THEN DELETE STUDENT
+        // THEN DELETE QOS
         int result = sd.delete(QosTable.TABLE_NAME,QosTable.ID + "= ? ", whereArgs);
         return (result > 0);
     }
+
+
+
+
 
     // METHOD FOR SAFELY REMOVING A network
     @SuppressLint("LongLogTag")
@@ -292,7 +216,7 @@ public class BDD extends SQLiteOpenHelper{
 
         // MAKE SURE YOU REMOVE Network FROM ALL Settings Qos ENROLLED
         sd.delete(Join.TABLE_NAME, Join.Network_ID +"= ? ", whereArgs);
-        // THEN DELETE COURSE
+        // THEN DELETE Network
         int result = sd.delete(NetworkTable.TABLE_NAME,NetworkTable.ID + "= ? ", whereArgs);
         return (result > 0);
     }

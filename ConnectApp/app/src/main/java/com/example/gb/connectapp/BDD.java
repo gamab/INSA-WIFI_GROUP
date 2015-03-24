@@ -155,6 +155,29 @@ public class BDD extends SQLiteOpenHelper{
         return SSID;
     }
 
+    @SuppressLint("LongLogTag")
+    public NetworkDesc getNetworkByNote()
+    {
+        NetworkDesc nd = new NetworkDesc(null,null);
+        SQLiteDatabase sd = getWritableDatabase();
+        int Note=0;
+        String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
+        query += "FROM " + NetworkTable.TABLE_NAME
+                + " NATURAL JOIN " + Join.TABLE_NAME
+                + " NATURAL JOIN " + QosTable.TABLE_NAME
+                + " ";
+        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
+
+        Cursor cursor = sd.rawQuery(query,null);
+        if (cursor.moveToNext()) {
+            nd = new NetworkDesc(cursor.getString(0), cursor.getString(1));
+            Log.w("GET NETWORK BY MARK", "SSID= " + nd.getmName() + "-- PASS= " + nd.getmPass());
+        }
+        cursor.close();
+        return nd;
+    }
+
 
     // GET ALL Network by mark
     @SuppressLint("LongLogTag")

@@ -8,7 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.ListIterator;
 import java.util.Set;
 
 /**
@@ -167,7 +169,7 @@ public class BDD extends SQLiteOpenHelper{
             Log.w("GET NETWORK BY MARK","SSID= "+cursor.getString(0) + "-- Note= " + cursor.getString(1));
         }
         cursor.close();
-        Log.w("Meilleur Reseau ==> ","SSID= "+SSID + "-- Note= " + Note);
+        Log.w("Meilleur Reseau ==> ", "SSID= " + SSID + "-- Note= " + Note);
         return SSID;
     }
 
@@ -194,6 +196,44 @@ public class BDD extends SQLiteOpenHelper{
         return nd;
     }
 
+    @SuppressLint("LongLogTag")
+    public NetworkDesc getNetworkByNoteFrom(ArrayList<String> ssids)
+    {
+        NetworkDesc nd = new NetworkDesc(null,null);
+        SQLiteDatabase sd = getWritableDatabase();
+        int Note=0;
+        String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
+
+        query += "FROM " + NetworkTable.TABLE_NAME
+                + " NATURAL JOIN " + Join.TABLE_NAME
+                + " NATURAL JOIN " + QosTable.TABLE_NAME
+                + " ";
+
+        //Now check wifis from the list
+        query += "WHERE ";
+        //Go through the list but does not put "OR" after the last network
+        ListIterator<String> it = ssids.listIterator();
+        int i = 0;
+        while (it.hasNext() && i < ssids.size() - 1) {
+            query += NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "=\"" + it.next() + "\" OR ";
+            i++;
+        }
+        query += NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "=\"" + it.next() + "\" ";
+
+
+        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
+
+        Log.d(TAG,"Query is : " + query);
+
+        Cursor cursor = sd.rawQuery(query,null);
+        if (cursor.moveToNext()) {
+            nd = new NetworkDesc(cursor.getString(0), cursor.getString(1));
+            Log.w("GET NETWORK BY MARK", "SSID= " + nd.getmName() + "-- PASS= " + nd.getmPass());
+        }
+        cursor.close();
+        return nd;
+    }
 
     // GET ALL Network by mark
     @SuppressLint("LongLogTag")

@@ -55,7 +55,11 @@ public class ConnectActivity extends ActionBarActivity {
 
                 //String ssid=sh.getNetworkByMark();
                 //Connect(ssid, sh.getPresharKeyBySSID(ssid));
-                NetworkDesc nd = sh.getNetworkByNote();
+                //NetworkDesc nd = sh.getNetworkByNote();
+                ArrayList<String> wifis = new ArrayList<String>();
+                wifis.add("JCWifi");
+                wifis.add("Yann Mb");
+                NetworkDesc nd = sh.getNetworkByNoteFrom(wifis);
                 Log.d(TAG,"Best network is : SSID : " + nd.getmName() + " PKEY : " + nd.getmPass());
 
                 Connect(nd.getmName(),nd.getmPass());

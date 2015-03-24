@@ -119,7 +119,7 @@ public class ConnectActivity extends ActionBarActivity {
     }
 
     public void Disconnect() {
-        Log.d(TAG,"Get rid of wifi config (" + wifiManager.getConfiguredNetworks().get(netId).SSID + " | )");
+        //Log.d(TAG,"Get rid of wifi config (" + wifiManager.getConfiguredNetworks().get(netId).SSID + " | )");
 
         Log.d(TAG,"Disconnecting");
         wifiManager.disconnect();

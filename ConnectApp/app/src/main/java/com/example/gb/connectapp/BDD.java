@@ -132,12 +132,17 @@ public class BDD extends SQLiteOpenHelper{
     {
         SQLiteDatabase sd = getWritableDatabase();
 
-        String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "," +
-                        NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
-                        NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ","+
-                        QosTable.TABLE_NAME + "." + QosTable.ID + ","+
-                        QosTable.TABLE_NAME + "." + QosTable.Note + ","+
-                        QosTable.TABLE_NAME + "." + QosTable.Time ;
+        String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + ", " +
+                        NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + ", " +
+                        NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ", "+
+                        QosTable.TABLE_NAME + "." + QosTable.ID + ", "+
+                        QosTable.TABLE_NAME + "." + QosTable.Note + ", "+
+                        QosTable.TABLE_NAME + "." + QosTable.Time + " "
+
+
+
+
+                ;
 
         query += "FROM " + NetworkTable.TABLE_NAME
                 + " NATURAL JOIN " + Join.TABLE_NAME

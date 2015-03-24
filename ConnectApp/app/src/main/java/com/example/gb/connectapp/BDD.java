@@ -47,8 +47,8 @@ public class BDD extends SQLiteOpenHelper{
         db.execSQL("CREATE TABLE " + Join.TABLE_NAME + " (" + Join.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + Join.Network_ID + " INTEGER,"
                 + Join.Qos_ID + " INTEGER,"
-                +"FOREIGN KEY( "+Join.Network_ID+") REFERENCES "+NetworkTable.TABLE_NAME+"("+NetworkTable.ID+"),"
-                +"FOREIGN KEY( "+Join.Qos_ID+") REFERENCES "+QosTable.TABLE_NAME+"("+QosTable.ID+");");
+                +"FOREIGN KEY ( "+Join.Network_ID+") REFERENCES "+NetworkTable.TABLE_NAME+" ("+NetworkTable.ID+"),"
+                +"FOREIGN KEY ( "+Join.Qos_ID+") REFERENCES "+QosTable.TABLE_NAME+" ("+QosTable.ID+"));");
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion,int newVersion)
@@ -155,7 +155,7 @@ public class BDD extends SQLiteOpenHelper{
             cursor3.close();
         }
         cursor2.close();*/
-        Cursor cursor = sd.rawQuery("SELECT "+NetworkTable.SSID+", "+QosTable.Note+" FROM " + NetworkTable.TABLE_NAME+" natural join "+Join.TABLE_NAME+" natural join "+QosTable.TABLE_NAME+ "order by "+QosTable.Note+" DESC",null);
+        Cursor cursor = sd.rawQuery("SELECT "+NetworkTable.SSID+", "+QosTable.Note+" FROM " + NetworkTable.TABLE_NAME+" natural join "+Join.TABLE_NAME+" natural join "+QosTable.TABLE_NAME+ " order by "+QosTable.Note+" DESC",null);
         while (cursor.moveToNext())
         {
             if(i<1)

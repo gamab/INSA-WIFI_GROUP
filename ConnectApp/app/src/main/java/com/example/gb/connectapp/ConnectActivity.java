@@ -51,11 +51,14 @@ public class ConnectActivity extends ActionBarActivity {
 
                 // ADD Qos AND RETURN THEIR IDS
                 long qos1 = Evaluation_Reseau(net1, "5", "16:00:00");
-                long qos2 = Evaluation_Reseau(net2, "4", "17:00:00");
+                long qos2 = Evaluation_Reseau(net2, "6", "17:00:00");
 
-                String ssid=sh.getNetworkByMark();
-                Connect(ssid, sh.getPresharKeyBySSID(ssid));
+                //String ssid=sh.getNetworkByMark();
+                //Connect(ssid, sh.getPresharKeyBySSID(ssid));
+                NetworkDesc nd = sh.getNetworkByNote();
+                Log.d(TAG,"Best network is : SSID : " + nd.getmName() + " PKEY : " + nd.getmPass());
 
+                Connect(nd.getmName(),nd.getmPass());
                 /*
                 while (true) {
                     if (TimeStamp_Insa() != 0) {
@@ -116,8 +119,7 @@ public class ConnectActivity extends ActionBarActivity {
     }
 
     public void Disconnect() {
-        String networkSSID = "JCsWiFi";
-        Log.d(TAG,"Get rid of wifi config (" + networkSSID + " | )");
+        Log.d(TAG,"Get rid of wifi config (" + wifiManager.getConfiguredNetworks().get(netId).SSID + " | )");
 
         Log.d(TAG,"Disconnecting");
         wifiManager.disconnect();

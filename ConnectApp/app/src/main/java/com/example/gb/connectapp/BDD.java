@@ -46,7 +46,9 @@ public class BDD extends SQLiteOpenHelper{
         Log.w("====>CREATE Join MAPPING TABLE"," with ID="+Join.ID+"  Network_ID="+Join.Network_ID+"  Qos_ID="+Join.Qos_ID+"!!");
         db.execSQL("CREATE TABLE " + Join.TABLE_NAME + " (" + Join.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + Join.Network_ID + " INTEGER,"
-                + Join.Qos_ID + " INTEGER);");
+                + Join.Qos_ID + " INTEGER,"
+                +"FOREIGN KEY( "+Join.Network_ID+") REFERENCES "+NetworkTable.TABLE_NAME+"("+NetworkTable.ID+"),"
+                +"FOREIGN KEY( "+Join.Qos_ID+") REFERENCES "+QosTable.TABLE_NAME+"("+QosTable.ID+");");
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion,int newVersion)
@@ -136,9 +138,10 @@ public class BDD extends SQLiteOpenHelper{
     {
         SQLiteDatabase sd = getWritableDatabase();
         int Note=0;
+        int i=0;
         String SSID="";
 
-        Cursor cursor2 = sd.rawQuery("SELECT * FROM " + Join.TABLE_NAME,null);
+       /* Cursor cursor2 = sd.rawQuery("SELECT * FROM " + Join.TABLE_NAME,null);
         while (cursor2.moveToNext()) {
             Cursor cursor3 = sd.rawQuery("SELECT "+QosTable.Note+" FROM " + QosTable.TABLE_NAME+" WHERE "+QosTable.ID+"="+cursor2.getString(2),null);
             Cursor cursor = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.ID+"="+cursor2.getString(1),null);
@@ -151,7 +154,20 @@ public class BDD extends SQLiteOpenHelper{
             cursor.close();
             cursor3.close();
         }
-        cursor2.close();
+        cursor2.close();*/
+        Cursor cursor = sd.rawQuery("SELECT "+NetworkTable.SSID+", "+QosTable.Note+" FROM " + NetworkTable.TABLE_NAME+" natural join "+Join.TABLE_NAME+" natural join "+QosTable.TABLE_NAME+ "order by "+QosTable.Note+" DESC",null);
+        while (cursor.moveToNext())
+        {
+            if(i<1)
+            {
+                SSID= cursor.getString(0);
+                Note = cursor.getInt(1);
+            }
+            i++;
+            Log.w("GET NETWORK BY MARK","SSID= "+cursor.getString(0) + "-- Note= " + cursor.getString(1));
+        }
+        cursor.close();
+        Log.w("Meilleur Reseau ==> ","SSID= "+SSID + "-- Note= " + Note);
         return SSID;
     }
 
@@ -164,7 +180,10 @@ public class BDD extends SQLiteOpenHelper{
 
         String Key="";
         Cursor cursor2 = sd.rawQuery("SELECT "+NetworkTable.PresharedKey+" FROM " + NetworkTable.TABLE_NAME+" WHERE "+NetworkTable.SSID+"="+ssid,null);
-
+        if(cursor2.moveToNext())
+        {
+            Key =cursor2.getString(0);
+        }
         cursor2.close();
         return Key;
     }

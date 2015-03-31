@@ -6,11 +6,13 @@ package com.example.gb.connectapp;
 public class NetworkDesc {
 
     private String mName;
+    private String mBSSID;
     private String mPass;
 
-    public NetworkDesc(String mName, String mPass) {
-        this.mName = mName;
-        this.mPass = mPass;
+    public NetworkDesc(String name, String BSSID, String pass) {
+        this.mName = name;
+        this.mBSSID = BSSID;
+        this.mPass = pass;
     }
 
     public String getmName() {
@@ -27,5 +29,13 @@ public class NetworkDesc {
 
     public void setmPass(String mPass) {
         this.mPass = mPass;
+    }
+
+    public String getmBSSID() {
+        return mBSSID;
+    }
+
+    public void setmBSSID(String mBSSID) {
+        this.mBSSID = mBSSID;
     }
 }

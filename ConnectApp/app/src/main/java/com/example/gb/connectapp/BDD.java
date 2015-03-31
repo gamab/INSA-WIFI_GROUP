@@ -41,9 +41,13 @@ public class BDD extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db)
     {
         // CREATE Network TABLE
-        Log.w("====>CREATE Network TABLE"," with ID="+NetworkTable.ID+"  SSID="+NetworkTable.SSID+"  PresharedKey="+NetworkTable.PresharedKey+"!!");
+        Log.w("====>CREATE Network TABLE"," with ID="+NetworkTable.ID+
+                "  SSID="+NetworkTable.SSID+
+                "  BSSID="+NetworkTable.BSSID+
+                "  PresharedKey="+NetworkTable.PresharedKey+"!!");
         db.execSQL("CREATE TABLE " + NetworkTable.TABLE_NAME + " (" + NetworkTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + NetworkTable.SSID + " TEXT,"
+                + NetworkTable.BSSID + " TEXT,"
                 + NetworkTable.PresharedKey + " TEXT);");
 
         // CREATE Network TABLE
@@ -111,6 +115,29 @@ public class BDD extends SQLiteOpenHelper{
         return result;
     }
 
+    /**
+     * Permet d'ajouter un réseau à la Base de données
+     * @param SSID Le SSID du réseau
+     * @param BSSID Le BSSID du réseau
+     * @param PresharedKey La clé associée à ce réseau
+     * @return l'ID de la ligne nouvellement insérée ou -1 s'il y a eu erreur
+     */
+    @SuppressLint("LongLogTag")
+    public long addNetwork(String SSID,String BSSID, String PresharedKey)
+    {
+        Log.w("====>WRAPPER METHOD FOR ADDING A Network"," with SSID="+SSID+"  PresharedKey="+PresharedKey+"!!");
+        // CREATE A CONTENTVALUE OBJECT
+        ContentValues cv = new ContentValues();
+        cv.put(NetworkTable.SSID, SSID);
+        cv.put(NetworkTable.BSSID, BSSID);
+        cv.put(NetworkTable.PresharedKey, PresharedKey);
+        // RETRIEVE WRITEABLE DATABASE AND INSERT
+        SQLiteDatabase sd = getWritableDatabase();
+        long result = sd.insert(NetworkTable.TABLE_NAME,null, cv);
+
+        return result;
+    }
+
 
     // WRAPPER METHOD FOR ADDING A Qos
 
@@ -164,6 +191,7 @@ public class BDD extends SQLiteOpenHelper{
 
         String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + ", " +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + ", " +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID + ", " +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ", "+
                 QosTable.TABLE_NAME + "." + QosTable.ID + ", "+
                 QosTable.TABLE_NAME + "." + QosTable.Note + ", "+
@@ -177,12 +205,16 @@ public class BDD extends SQLiteOpenHelper{
         query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
 
         Cursor cursor = sd.rawQuery(query,null);
-        Log.d(TAG, "ID_Network      ||   SSID     ||  Presharedkey    ||  ID_Qos    ||  Note   ||   Timestamp ");
+        Log.d(TAG, "ID_Network  ||  SSID  ||  BSSID  ||  Presharedkey  ||  ID_Qos  ||  Note ||  Timestamp ");
         while (cursor.moveToNext()) {
 
-            Log.d(TAG,  cursor.getString(0)+"      ||   "+cursor.getString(1)+"     ||  "+
-                    cursor.getString(2)+"    ||  "+cursor.getString(3)+"    ||  "+cursor.getString(4)+
-                    "   ||   "+cursor.getString(5)+" ");
+            Log.d(TAG,  cursor.getString(0)+
+                    "   ||   " + cursor.getString(1) +
+                    "   ||   " + cursor.getString(2)+
+                    "   ||   " + cursor.getString(3)+
+                    "   ||   " + cursor.getString(4)+
+                    "   ||   " + cursor.getString(5)+
+                    "   ||   " + cursor.getString(6)+" ");
         }
         cursor.close();
     }
@@ -194,10 +226,11 @@ public class BDD extends SQLiteOpenHelper{
     @SuppressLint("LongLogTag")
     public NetworkDesc getNetworkByNote()
     {
-        NetworkDesc nd = new NetworkDesc(null,null);
+        NetworkDesc nd = new NetworkDesc(null,null,null);
         SQLiteDatabase sd = getWritableDatabase();
-        int Note=0;
+
         String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
         query += "FROM " + NetworkTable.TABLE_NAME
                 + " NATURAL JOIN " + JoinTable.TABLE_NAME
@@ -207,25 +240,31 @@ public class BDD extends SQLiteOpenHelper{
 
         Cursor cursor = sd.rawQuery(query,null);
         if (cursor.moveToNext()) {
-            nd = new NetworkDesc(cursor.getString(0), cursor.getString(1));
-            Log.w("GET NETWORK BY MARK", "SSID= " + nd.getmName() + "-- PASS= " + nd.getmPass());
+            nd.setmName(cursor.getString(0));
+            nd.setmBSSID(cursor.getString(1));
+            nd.setmPass(cursor.getString(2));
+            Log.w("GET NETWORK BY MARK", "SSID= " + nd.getmName() + "-- BSSID= "  + nd.getmBSSID() + "-- PASS= " + nd.getmPass());
         }
+
         cursor.close();
         return nd;
     }
 
     /**
      * Permet de récupérer le meilleur réseau de la base de données parmi une liste de réseaux
-     * @param ssids la liste de réseaux
+     * @param networks la liste de réseaux
      * @return le meilleur réseau
      */
     @SuppressLint("LongLogTag")
-    public NetworkDesc getNetworkByNoteFrom(ArrayList<String> ssids)
+    public NetworkDesc getNetworkByNoteFrom(ArrayList<NetworkDesc> networks)
     {
-        NetworkDesc nd = new NetworkDesc(null,null);
+        NetworkDesc nd = new NetworkDesc(null,null, null);
+        NetworkDesc curNd;
         SQLiteDatabase sd = getWritableDatabase();
-        int Note=0;
-        String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
+
+        String query = "SELECT " +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID + "," +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
@@ -236,13 +275,17 @@ public class BDD extends SQLiteOpenHelper{
         //Now check wifis from the list
         query += "WHERE ";
         //Go through the list but does not put "OR" after the last network
-        ListIterator<String> it = ssids.listIterator();
+        ListIterator<NetworkDesc> it = networks.listIterator();
         int i = 0;
-        while (it.hasNext() && i < ssids.size() - 1) {
-            query += NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "=\"" + it.next() + "\" OR ";
+        while (it.hasNext() && i < networks.size() - 1) {
+            curNd = it.next();
+            query += "(" + NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "=\"" + curNd.getmName() + "\"" +
+                    " AND " + NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID + "=\"" + curNd.getmBSSID() + "\") OR ";
             i++;
         }
-        query += NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "=\"" + it.next() + "\" ";
+        curNd = it.next();
+        query += "(" + NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "=\"" + curNd.getmName() + "\"" +
+                " AND " + NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID + "=\"" + curNd.getmBSSID() + "\") ";
 
 
         query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
@@ -251,8 +294,10 @@ public class BDD extends SQLiteOpenHelper{
 
         Cursor cursor = sd.rawQuery(query,null);
         if (cursor.moveToNext()) {
-            nd = new NetworkDesc(cursor.getString(0), cursor.getString(1));
-            Log.w("GET NETWORK BY MARK", "SSID= " + nd.getmName() + "-- PASS= " + nd.getmPass());
+            nd.setmName(cursor.getString(0));
+            nd.setmBSSID(cursor.getString(1));
+            nd.setmPass(cursor.getString(2));
+            Log.w("GET NETWORK BY MARK", "SSID= " + nd.getmName() + "-- BSSID= "  + nd.getmBSSID() + "-- PASS= " + nd.getmPass());
         }
         cursor.close();
         return nd;

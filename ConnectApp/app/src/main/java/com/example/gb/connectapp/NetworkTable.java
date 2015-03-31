@@ -9,6 +9,8 @@ public class NetworkTable {
     public static final String ID = "_id";
     // SSID OF THE Network
     public static final String SSID = "SSID";
+    // BSSID OF THE Network
+    public static final String BSSID = "BSSID";
     // Key OF Network
     public static final String PresharedKey = "PresharedKey";
     // NAME OF THE TABLE

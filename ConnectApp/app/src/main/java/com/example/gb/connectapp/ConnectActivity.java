@@ -55,10 +55,19 @@ public class ConnectActivity extends ActionBarActivity {
 
                 // ADD Qos AND RETURN THEIR IDS
                 long qos1 = Evaluation_Reseau(net1, "5", "16:00:00");
-                long qos2 = Evaluation_Reseau(net2, "4", "17:00:00");
+                long qos2 = Evaluation_Reseau(net2, "6", "17:00:00");
 
-                String ssid=sh.getNetworkByMark();
-                Connect(ssid, sh.getPresharKeyBySSID(ssid));
+                //String ssid=sh.getNetworkByMark();
+                //Connect(ssid, sh.getPresharKeyBySSID(ssid));
+                //NetworkDesc nd = sh.getNetworkByNote();
+                //ArrayList<String> wifis = new ArrayList<String>();
+                //wifis.add("JCWifi");
+                //wifis.add("Yann Mb");
+                //NetworkDesc nd = sh.getNetworkByNoteFrom(wifis);
+                //Log.d(TAG,"Best network is : SSID : " + nd.getmName() + " PKEY : " + nd.getmPass());
+
+                //Connect(nd.getmName(),nd.getmPass());
+                sh.printDatabase();
 
                 /*
                 while (true) {
@@ -120,8 +129,7 @@ public class ConnectActivity extends ActionBarActivity {
     }
 
     public void Disconnect() {
-        String networkSSID = "JCsWiFi";
-        Log.d(TAG,"Get rid of wifi config (" + networkSSID + " | )");
+        //Log.d(TAG,"Get rid of wifi config (" + wifiManager.getConfiguredNetworks().get(netId).SSID + " | )");
 
         Log.d(TAG,"Disconnecting");
         wifiManager.disconnect();
@@ -157,31 +165,12 @@ public class ConnectActivity extends ActionBarActivity {
         return qos;
     }
 
-    public void Visualisation_Parametres_Qos_reseau(long netID )
-    {
-        Log.d(TAG,"********** FONCTION Visualisation_Parametres_Qos_reseau");
-        // GET Qos FOR network
-        sh.getSettingsForNetwork((int) netID);
-    }
 
     public int TimeStamp_Insa()
     {
         Log.d(TAG,"********** FONCTION TimeStamp_Insa");
         String time=java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
         if(time.equals("16:45:00"))
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    public int TimeStamp_edurom()
-    {
-        String time=java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
-        if("16:46:00"==time)
         {
             return 1;
         }

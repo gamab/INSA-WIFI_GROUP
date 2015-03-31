@@ -1,5 +1,7 @@
 package com.example.gb.connectapp;
 
+import android.content.Context;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -8,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,14 +31,15 @@ public class ConnectActivity extends ActionBarActivity {
     private BDD sh = new BDD(this);
 
     private WifiManager wifiManager;
+    //WifiScanReceiver wifiReceiver;
+
+    ListView list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.connect_layout);
-
         wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
-
         mConnectBtn = (Button) findViewById(R.id.btn_connect);
         mConnectBtn.setOnClickListener(new View.OnClickListener() {
             @Override

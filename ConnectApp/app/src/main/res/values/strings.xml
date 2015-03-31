@@ -4,6 +4,7 @@
     <string name="app_name">ConnectApp</string>
     <string name="connect">Connection</string>
     <string name="disconnect">Déconnection</string>
+    <string name="listWifi">Lister les wifis</string>
     <string name="action_settings">Paramètres</string>
 
 </resources>

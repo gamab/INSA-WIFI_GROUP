@@ -9,9 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.ListIterator;
-import java.util.Set;
 
 /**
  * Created by UT on 10/03/2015.
@@ -31,6 +29,13 @@ public class BDD extends SQLiteOpenHelper{
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+
+
+    /**
+     * Permet la création de la base de données, notamment des tables :
+     * Network, QoS et Jointure, Jointure matérialise l'association entre un réseau et la QoS associée
+     * @param db la database du système.
+     */
     @SuppressLint("LongLogTag")
     @Override
     public void onCreate(SQLiteDatabase db)
@@ -48,13 +53,20 @@ public class BDD extends SQLiteOpenHelper{
                 + QosTable.Time + " TEXT);");
 
         // CREATE Join MAPPING TABLE
-        Log.w("====>CREATE Join MAPPING TABLE"," with ID="+Join.ID+"  Network_ID="+Join.Network_ID+"  Qos_ID="+Join.Qos_ID+"!!");
-        db.execSQL("CREATE TABLE " + Join.TABLE_NAME + " (" + Join.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + Join.Network_ID + " INTEGER,"
-                + Join.Qos_ID + " INTEGER,"
-                +"FOREIGN KEY ( "+Join.Network_ID+") REFERENCES "+NetworkTable.TABLE_NAME+" ("+NetworkTable.ID+"),"
-                +"FOREIGN KEY ( "+Join.Qos_ID+") REFERENCES "+QosTable.TABLE_NAME+" ("+QosTable.ID+"));");
+        Log.w("====>CREATE Join MAPPING TABLE"," with ID="+ JoinTable.ID+"  Network_ID="+ JoinTable.Network_ID+"  Qos_ID="+ JoinTable.Qos_ID+"!!");
+        db.execSQL("CREATE TABLE " + JoinTable.TABLE_NAME + " (" + JoinTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + JoinTable.Network_ID + " INTEGER,"
+                + JoinTable.Qos_ID + " INTEGER,"
+                +"FOREIGN KEY ( "+ JoinTable.Network_ID+") REFERENCES "+NetworkTable.TABLE_NAME+" ("+NetworkTable.ID+"),"
+                +"FOREIGN KEY ( "+ JoinTable.Qos_ID+") REFERENCES "+QosTable.TABLE_NAME+" ("+QosTable.ID+"));");
     }
+
+    /**
+     * Permet de réinitialiser la base de données
+     * @param db la base de données à reinit
+     * @param oldVersion Inutilisé
+     * @param newVersion Inutilisé
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion,int newVersion)
     {
@@ -62,11 +74,14 @@ public class BDD extends SQLiteOpenHelper{
         // KILL PREVIOUS TABLES IF UPGRADED
         db.execSQL("DROP TABLE IF EXISTS " + NetworkTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + QosTable.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Join.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + JoinTable.TABLE_NAME);
         // CREATE NEW INSTANCE OF SCHEMA
         onCreate(db);
     }
 
+    /**
+     * Permet de réinitialiser la base de données. Ne fait qu'appeler onUpgrade()
+     */
     public void deleteEverything() {
         SQLiteDatabase db = getWritableDatabase();
         onUpgrade(db,1,2);
@@ -74,6 +89,13 @@ public class BDD extends SQLiteOpenHelper{
     }
 
     // WRAPPER METHOD FOR ADDING A Network
+
+    /**
+     * Permet d'ajouter un réseau à la Base de données
+     * @param SSID Le SSID du réseau
+     * @param PresharedKey La clé associée à ce réseau
+     * @return l'ID de la ligne nouvellement insérée ou -1 s'il y a eu erreur
+     */
     @SuppressLint("LongLogTag")
     public long addNetwork(String SSID, String PresharedKey)
     {
@@ -85,14 +107,19 @@ public class BDD extends SQLiteOpenHelper{
         // RETRIEVE WRITEABLE DATABASE AND INSERT
         SQLiteDatabase sd = getWritableDatabase();
         long result = sd.insert(NetworkTable.TABLE_NAME,null, cv);
-        Cursor cursor = sd.rawQuery("SELECT * FROM " + NetworkTable.TABLE_NAME,null);
-        while (cursor.moveToNext()) {
-            Log.d(TAG1,cursor.getString(0) + " " + cursor.getString(1) + " " + cursor.getString(2));
-        }
-        cursor.close();
+
         return result;
     }
+
+
     // WRAPPER METHOD FOR ADDING A Qos
+
+    /**
+     * Permet d'ajouter une entrée à la table QoS, correspondant à une note et une heure
+     * @param note correspond à la note donnée par l'utilisateur à un réseau
+     * @param time correspond à l'horaire de connexion à ce réseau
+     * @return l'ID de la ligne nouvellement insérée ou -1 s'il y a eu erreur
+     */
     @SuppressLint("LongLogTag")
     public long addQos(String note, String time)
     {
@@ -102,65 +129,68 @@ public class BDD extends SQLiteOpenHelper{
         cv.put(QosTable.Time, time);
         SQLiteDatabase sd = getWritableDatabase();
         long result = sd.insert(QosTable.TABLE_NAME,null, cv);
-        Cursor cursor = sd.rawQuery("SELECT * FROM " + QosTable.TABLE_NAME,null);
-        while (cursor.moveToNext()) {
-            Log.d(TAG2,cursor.getString(0) + " " + cursor.getString(1) + " " + cursor.getString(2));
-        }
+
         return result;
     }
 
     // WRAPPER METHOD FOR ENROLLING A Setting INTO A Network
+
+    /**
+     * Permet de mettre en relation Réseau et QoS
+     * @param netId l'id du réseau dans la table network
+     * @param qosId l'id de qos dans la table qos
+     * @return true si la ligne a été insérée, false sinon
+     */
     @SuppressLint("LongLogTag")
     public boolean enrollSettingClass(int netId, int qosId)
     {
         Log.w("====>WRAPPER METHOD FOR ENROLLING A Setting INTO A Network"," with Network_ID="+netId+"  Qos_ID="+qosId+"!!");
         ContentValues cv = new ContentValues();
-        cv.put(Join.Network_ID, netId);
-        cv.put(Join.Qos_ID, qosId);
+        cv.put(JoinTable.Network_ID, netId);
+        cv.put(JoinTable.Qos_ID, qosId);
         SQLiteDatabase sd = getWritableDatabase();
-        long result = sd.insert(Join.TABLE_NAME,Join.Qos_ID, cv);
-        Cursor cursor = sd.rawQuery("SELECT * FROM " + Join.TABLE_NAME,null);
-        while (cursor.moveToNext()) {
-            Log.d(TAG3,cursor.getString(0) + " " + cursor.getString(1) + " " + cursor.getString(2));
-        }
+        long result = sd.insert(JoinTable.TABLE_NAME, JoinTable.Qos_ID, cv);
+
         return (result >= 0);
     }
 
-    // GET ALL Settings Qos of one Network
+    /**
+     * Permet l'affichage de la jonction de la table network avec la table QoS dans les log
+     */
     @SuppressLint("LongLogTag")
     public void printDatabase()
     {
         SQLiteDatabase sd = getWritableDatabase();
 
         String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + ", " +
-                        NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + ", " +
-                        NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ", "+
-                        QosTable.TABLE_NAME + "." + QosTable.ID + ", "+
-                        QosTable.TABLE_NAME + "." + QosTable.Note + ", "+
-                        QosTable.TABLE_NAME + "." + QosTable.Time + " "
-
-
-
-
-                ;
+                NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + ", " +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ", "+
+                QosTable.TABLE_NAME + "." + QosTable.ID + ", "+
+                QosTable.TABLE_NAME + "." + QosTable.Note + ", "+
+                QosTable.TABLE_NAME + "." + QosTable.Time + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
-                + " NATURAL JOIN " + Join.TABLE_NAME
+                + " NATURAL JOIN " + JoinTable.TABLE_NAME
                 + " NATURAL JOIN " + QosTable.TABLE_NAME
                 + " ";
 
         query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
 
         Cursor cursor = sd.rawQuery(query,null);
-        Log.w("Database ", "ID_Network      ||   SSID     ||  Presharedkey    ||  ID_Qos    ||  Note   ||   Timestamp ");
+        Log.d(TAG, "ID_Network      ||   SSID     ||  Presharedkey    ||  ID_Qos    ||  Note   ||   Timestamp ");
         while (cursor.moveToNext()) {
 
-            Log.w("Database ",  cursor.getString(0)+"      ||   "+cursor.getString(1)+"     ||  "+cursor.getString(2)+"    ||  "+cursor.getString(3)+"    ||  "+cursor.getString(4)+"   ||   "+cursor.getString(5)+" ");
+            Log.d(TAG,  cursor.getString(0)+"      ||   "+cursor.getString(1)+"     ||  "+
+                    cursor.getString(2)+"    ||  "+cursor.getString(3)+"    ||  "+cursor.getString(4)+
+                    "   ||   "+cursor.getString(5)+" ");
         }
         cursor.close();
     }
 
-    // GET ALL Network by mark
+    /**
+     * Permet de récupérer le meilleur réseau de la base de données
+     * @return le meilleur réseau de la base de donnée
+     */
     @SuppressLint("LongLogTag")
     public NetworkDesc getNetworkByNote()
     {
@@ -170,7 +200,7 @@ public class BDD extends SQLiteOpenHelper{
         String query = "SELECT " + NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
         query += "FROM " + NetworkTable.TABLE_NAME
-                + " NATURAL JOIN " + Join.TABLE_NAME
+                + " NATURAL JOIN " + JoinTable.TABLE_NAME
                 + " NATURAL JOIN " + QosTable.TABLE_NAME
                 + " ";
         query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
@@ -184,6 +214,11 @@ public class BDD extends SQLiteOpenHelper{
         return nd;
     }
 
+    /**
+     * Permet de récupérer le meilleur réseau de la base de données parmi une liste de réseaux
+     * @param ssids la liste de réseaux
+     * @return le meilleur réseau
+     */
     @SuppressLint("LongLogTag")
     public NetworkDesc getNetworkByNoteFrom(ArrayList<String> ssids)
     {
@@ -194,7 +229,7 @@ public class BDD extends SQLiteOpenHelper{
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
-                + " NATURAL JOIN " + Join.TABLE_NAME
+                + " NATURAL JOIN " + JoinTable.TABLE_NAME
                 + " NATURAL JOIN " + QosTable.TABLE_NAME
                 + " ";
 
@@ -224,10 +259,11 @@ public class BDD extends SQLiteOpenHelper{
     }
 
 
-
-
-
-    // METHOD FOR SAFELY REMOVING A Setting Qos
+    /**
+     * Permet de supprimer une entrée QoS de la table QoS
+     * @param qosId l'id de l'entrée à supprimer
+     * @return si ça s'est bien passé ou non
+     */
     @SuppressLint("LongLogTag")
     public boolean removeSettingQos(int qosId)
     {
@@ -238,17 +274,18 @@ public class BDD extends SQLiteOpenHelper{
                         String.valueOf(qosId)
                 };
         // DELETE ALL CLASS MAPPINGS Setting Qos IS SIGNED UP FOR
-        sd.delete(Join.TABLE_NAME, Join.Qos_ID + "= ? ", whereArgs);
+        sd.delete(JoinTable.TABLE_NAME, JoinTable.Qos_ID + "= ? ", whereArgs);
         // THEN DELETE QOS
         int result = sd.delete(QosTable.TABLE_NAME,QosTable.ID + "= ? ", whereArgs);
         return (result > 0);
     }
 
 
-
-
-
-    // METHOD FOR SAFELY REMOVING A network
+    /**
+     * Permet de supprimer une entrée de la table networks
+     * @param netId l'id de l'entrée à supprimer
+     * @return si ça s'est bien passé ou non
+     */
     @SuppressLint("LongLogTag")
     public boolean removeNetwork(int netId)
     {
@@ -260,7 +297,7 @@ public class BDD extends SQLiteOpenHelper{
                 };
 
         // MAKE SURE YOU REMOVE Network FROM ALL Settings Qos ENROLLED
-        sd.delete(Join.TABLE_NAME, Join.Network_ID +"= ? ", whereArgs);
+        sd.delete(JoinTable.TABLE_NAME, JoinTable.Network_ID +"= ? ", whereArgs);
         // THEN DELETE Network
         int result = sd.delete(NetworkTable.TABLE_NAME,NetworkTable.ID + "= ? ", whereArgs);
         return (result > 0);

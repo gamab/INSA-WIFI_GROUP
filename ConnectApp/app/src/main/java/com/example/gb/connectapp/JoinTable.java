@@ -3,7 +3,7 @@ package com.example.gb.connectapp;
 /**
  * Created by UT on 10/03/2015.
  */
-public class Join {
+public class JoinTable {
     // THIS ESSENTIALLY REPRESENTS A MAPPING FROM STUDENTS TO COURSES
 
     // UNIQUE ID OF EACH ROW - NO REAL MEANING HERE

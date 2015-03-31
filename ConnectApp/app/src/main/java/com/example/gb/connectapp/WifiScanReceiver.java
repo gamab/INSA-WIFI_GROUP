@@ -34,6 +34,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
         ListIterator<ScanResult> lit = wifiScanList.listIterator();
         ScanResult sr;
         NetworkDesc nd;
+        ssidList.clear();
         while (lit.hasNext()) {
             sr = lit.next();
             if (! sr.SSID.isEmpty()) {
@@ -46,6 +47,8 @@ public class WifiScanReceiver extends BroadcastReceiver {
             }
         }
         showSSID();
+        Log.d(TAG,"Unregister this receiver");
+        c.unregisterReceiver(this);
     }
 
     /*
@@ -58,4 +61,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
         }
     }
 
+    public ArrayList<NetworkDesc> getSsidList() {
+        return ssidList;
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.gb.connectapp;
 
-import android.database.Cursor;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.ActionBarActivity;
@@ -11,9 +12,6 @@ import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
 
 
 public class ConnectActivity extends ActionBarActivity {
@@ -22,34 +20,43 @@ public class ConnectActivity extends ActionBarActivity {
 
     private Button mConnectBtn;
     private Button mDisconnectBtn;
+    private Button mScanListWifiBtn;
 
     private int netId;
 
-    private BDD sh = new BDD(this);
+    private BDD mBdd = new BDD(this);
 
-    private WifiManager wifiManager;
+    private WifiManager mwifiManager;
+    //WifiScanReceiver wifiReceiver;
+
+    ArrayList<String> ssidList = new ArrayList<String>();
+
+    WifiScanReceiver wifiReceiver;
+
+    //ListView list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.connect_layout);
 
-        wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
-
+        mwifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         mConnectBtn = (Button) findViewById(R.id.btn_connect);
+        wifiReceiver = new WifiScanReceiver(mwifiManager);
         mConnectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Here put the connection code
-                Log.d(TAG, "Click sur le bouton Connect");
+                Log.d(TAG, "Click sur le bouton Connection");
                 //Connect(networkSSID ,networkPass);
-                sh.deleteEverything();
+                mBdd.deleteEverything();
 
                 // ADD Networks AND RETURN THEIR IDS
                 //long net2 = Ajout_Reseau_BDD("GabMab", "12345_wifi");
                 //long net1 = Ajout_Reseau_BDD("Yann Mb", "12345_wifi");
-                long net1 = sh.addNetwork("Yann Mb", "36:5A:05:A4:DE:67", "pass12345__");
-                long net2 = sh.addNetwork("gifi", "F8:E0:79:3D:33:3C", "pass12345__");
+                long net1 = mBdd.addNetwork("Yann Mb", "36:5A:05:A4:DE:67", "pass12345__");
+                long net2 = mBdd.addNetwork("gifi", "F8:E0:79:3D:33:3C", "pass12345__");
 
                 // ADD Qos AND RETURN THEIR IDS
                 long qos1 = Evaluation_Reseau(net1, "5", "16:00:00");
@@ -63,7 +70,7 @@ public class ConnectActivity extends ActionBarActivity {
                 wifis.add(new NetworkDesc("gifi", "F8:E0:79:3D:33:3C",""));
                 wifis.add(new NetworkDesc("JCwifi", "36:5A:05:C5:DF:89",""));
 
-                NetworkDesc nd = sh.getNetworkByNoteFrom(wifis);
+                NetworkDesc nd = mBdd.getNetworkByNoteFrom(wifis);
                 if (nd != null) {
                     if (nd.getmName() != null) {
                         Log.d(TAG, "Best network is : SSID : " + nd.getmName() + " PKEY : " + nd.getmPass());
@@ -76,7 +83,7 @@ public class ConnectActivity extends ActionBarActivity {
                     Log.d(TAG, "Could not found best WIFI.");
                 }
                 //Connect(nd.getmName(),nd.getmPass());
-                sh.printDatabase();
+                mBdd.printDatabase();
 
                 /*
                 while (true) {
@@ -95,27 +102,50 @@ public class ConnectActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //Here put the connection code
-                Log.d(TAG,"Click sur le bouton Disconnect");
+                Log.d(TAG, "Click sur le bouton Deconnection");
                 Disconnect();
+            }
+        });
+
+        mScanListWifiBtn = (Button) findViewById(R.id.btn_listwifi);
+        mScanListWifiBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Here put the connection code
+                Log.d(TAG, "Click sur le bouton ListerLesWifis");
+                wifiScanning();
             }
         });
     }
 
-    public void Connect(String networkSSID ,String networkPass) {
-        Log.d(TAG,"********** FONCTION CONNECT");
+    //When the app is going on pause then we stop the broadcast receiver
+    protected void onPause() {
+        unregisterReceiver(wifiReceiver);
+        super.onPause();
+    }
+
+    //When the app is starting again then we start the broadcast receiver back
+    protected void onResume() {
+        registerReceiver(wifiReceiver, new IntentFilter(
+                WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        super.onResume();
+    }
+
+    public void Connect(String networkSSID, String networkPass) {
+        Log.d(TAG, "********** FONCTION CONNECT");
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", networkSSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", networkPass);
-        Log.d(TAG,"Configure wifi config (" + networkSSID + " | " + networkPass + ")");
+        Log.d(TAG, "Configure wifi config (" + networkSSID + " | " + networkPass + ")");
 
         WifiManager wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
         //remember id
         netId = wifiManager.addNetwork(wifiConfig);
-        Log.d(TAG,"Disconnecting");
+        Log.d(TAG, "Disconnecting");
         wifiManager.disconnect();
-        Log.d(TAG,"Enabling network");
+        Log.d(TAG, "Enabling network");
         wifiManager.enableNetwork(netId, true);
-        Log.d(TAG,"Connecting");
+        Log.d(TAG, "Connecting");
         wifiManager.reconnect();
     }
 
@@ -125,66 +155,65 @@ public class ConnectActivity extends ActionBarActivity {
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", networkSSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", networkPass);
-        Log.d(TAG,"Configure wifi config (" + networkSSID + " | " + networkPass + ")");
+        Log.d(TAG, "Configure wifi config (" + networkSSID + " | " + networkPass + ")");
 
         //remember id
-        netId = wifiManager.addNetwork(wifiConfig);
-        Log.d(TAG,"Disconnecting");
-        wifiManager.disconnect();
-        Log.d(TAG,"Enabling network");
-        wifiManager.enableNetwork(netId, true);
-        Log.d(TAG,"Connecting");
-        wifiManager.reconnect();
+        netId = mwifiManager.addNetwork(wifiConfig);
+        Log.d(TAG, "Disconnecting");
+        mwifiManager.disconnect();
+        Log.d(TAG, "Enabling network");
+        mwifiManager.enableNetwork(netId, true);
+        Log.d(TAG, "Connecting");
+        mwifiManager.reconnect();
     }
 
     public void Disconnect() {
-        //Log.d(TAG,"Get rid of wifi config (" + wifiManager.getConfiguredNetworks().get(netId).SSID + " | )");
+        //Log.d(TAG,"Get rid of wifi config (" + mwifiManager.getConfiguredNetworks().get(netId).SSID + " | )");
 
-        Log.d(TAG,"Disconnecting");
-        wifiManager.disconnect();
-        Log.d(TAG,"Removing Network");
-        wifiManager.removeNetwork(this.netId);
+        Log.d(TAG, "Disconnecting");
+        mwifiManager.disconnect();
+        Log.d(TAG, "Removing Network");
+        mwifiManager.removeNetwork(this.netId);
     }
 
-    public long Ajout_Reseau_BDD(String networkSSID ,String networkPass)
-    {
-        Log.d(TAG,"********** FONCTION Association_Liste_reseau");
+    public void wifiScanning() {
+        Log.d(TAG, "Scanning Nets");
+        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        mwifiManager.startScan();
+    }
+
+    public long Ajout_Reseau_BDD(String networkSSID, String networkPass) {
+        Log.d(TAG, "********** FONCTION Association_Liste_reseau");
         // ADD Networks AND RETURN THEIR IDS
-        long net = sh.addNetwork(networkSSID, networkPass);
+        long net = mBdd.addNetwork(networkSSID, networkPass);
         //Connect(networkSSID, networkPass);
 
         return net;
     }
 
-    public void Classement_Reseau_par_Note(long netID ,int Note)
-    {
-        Log.d(TAG,"********** FONCTION Classement_Reseau_par_Note");
+    public void Classement_Reseau_par_Note(long netID, int Note) {
+        Log.d(TAG, "********** FONCTION Classement_Reseau_par_Note");
         // GET Qos Note FOR Networks AND FILTER BY Note
 
     }
 
-    public long Evaluation_Reseau(long netID, String note, String time)
-    {
-        Log.d(TAG,"********** Evaluation_Reseau");
+    public long Evaluation_Reseau(long netID, String note, String time) {
+        Log.d(TAG, "********** Evaluation_Reseau");
         // ADD Qos AND RETURN THEIR IDS
-        long qos = sh.addQos(note,time);
+        long qos = mBdd.addQos(note, time);
         // ENROLL Networks IN Qos
-        sh.enrollSettingClass((int) netID,(int) qos);
+        mBdd.enrollSettingClass((int) netID, (int) qos);
 
         return qos;
     }
 
 
-    public int TimeStamp_Insa()
-    {
-        Log.d(TAG,"********** FONCTION TimeStamp_Insa");
-        String time=java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
-        if(time.equals("16:45:00"))
-        {
+    public int TimeStamp_Insa() {
+        Log.d(TAG, "********** FONCTION TimeStamp_Insa");
+        String time = java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
+        if (time.equals("16:45:00")) {
             return 1;
-        }
-        else
-        {
+        } else {
             return 0;
         }
     }

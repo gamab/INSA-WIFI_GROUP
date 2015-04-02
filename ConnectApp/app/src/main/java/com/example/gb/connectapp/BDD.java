@@ -50,11 +50,12 @@ public class BDD extends SQLiteOpenHelper{
                 + NetworkTable.BSSID + " TEXT,"
                 + NetworkTable.PresharedKey + " TEXT);");
 
-        // CREATE Network TABLE
-        Log.w("====>CREATE QoS TABLE"," with ID="+QosTable.ID+"  Note="+QosTable.Note+"  TimeStamp="+QosTable.Time+"!!");
+        // CREATE Qos TABLE
+        Log.w("====>CREATE QoS TABLE"," with ID="+QosTable.ID+"  Note="+QosTable.Note+"  Heure_deb="+QosTable.H_deb+"  Heure_fin="+QosTable.H_fin+"!!");
         db.execSQL("CREATE TABLE " + QosTable.TABLE_NAME + " (" + QosTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + QosTable.Note + " Integer,"
-                + QosTable.Time + " TEXT);");
+                + QosTable.H_deb + " TEXT,"
+                + QosTable.H_fin + " TEXT);");
 
         // CREATE Join MAPPING TABLE
         Log.w("====>CREATE Join MAPPING TABLE"," with ID="+ JoinTable.ID+"  Network_ID="+ JoinTable.Network_ID+"  Qos_ID="+ JoinTable.Qos_ID+"!!");
@@ -144,16 +145,18 @@ public class BDD extends SQLiteOpenHelper{
     /**
      * Permet d'ajouter une entrée à la table QoS, correspondant à une note et une heure
      * @param note correspond à la note donnée par l'utilisateur à un réseau
-     * @param time correspond à l'horaire de connexion à ce réseau
+     * @param time_deb correspond à l'horaire de connexion debut à ce réseau
+     * @param time_fin correspond à l'horaire de connexion fin à ce réseau
      * @return l'ID de la ligne nouvellement insérée ou -1 s'il y a eu erreur
      */
     @SuppressLint("LongLogTag")
-    public long addQos(String note, String time)
+    public long addQos(String note, String time_deb,String time_fin)
     {
-        Log.w("====>WRAPPER METHOD FOR ADDING A Qos"," with Note="+note+"  Time="+time+"!!");
+        Log.w("====>WRAPPER METHOD FOR ADDING A Qos"," with Note="+note+"  Time_deb="+time_deb+"  Time_fin="+time_fin+"!!");
         ContentValues cv = new ContentValues();
         cv.put(QosTable.Note, note);
-        cv.put(QosTable.Time, time);
+        cv.put(QosTable.H_deb, time_deb);
+        cv.put(QosTable.H_fin, time_fin);
         SQLiteDatabase sd = getWritableDatabase();
         long result = sd.insert(QosTable.TABLE_NAME,null, cv);
 
@@ -195,7 +198,8 @@ public class BDD extends SQLiteOpenHelper{
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ", "+
                 QosTable.TABLE_NAME + "." + QosTable.ID + ", "+
                 QosTable.TABLE_NAME + "." + QosTable.Note + ", "+
-                QosTable.TABLE_NAME + "." + QosTable.Time + " ";
+                QosTable.TABLE_NAME + "." + QosTable.H_deb + ", "+
+                QosTable.TABLE_NAME + "." + QosTable.H_fin + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
                 + " NATURAL JOIN " + JoinTable.TABLE_NAME
@@ -205,7 +209,7 @@ public class BDD extends SQLiteOpenHelper{
         query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
 
         Cursor cursor = sd.rawQuery(query,null);
-        Log.d(TAG, "ID_Network  ||  SSID  ||  BSSID  ||  Presharedkey  ||  ID_Qos  ||  Note ||  Timestamp ");
+        Log.d(TAG, "ID_Network  ||  SSID  ||  BSSID  ||  Presharedkey  ||  ID_Qos  ||  Note ||  Heure_deb  ||  Heure_fin ");
         while (cursor.moveToNext()) {
 
             Log.d(TAG,  cursor.getString(0)+
@@ -214,7 +218,8 @@ public class BDD extends SQLiteOpenHelper{
                     "   ||   " + cursor.getString(3)+
                     "   ||   " + cursor.getString(4)+
                     "   ||   " + cursor.getString(5)+
-                    "   ||   " + cursor.getString(6)+" ");
+                    "   ||   " + cursor.getString(6)+
+                    "   ||   " + cursor.getString(7)+" ");
         }
         cursor.close();
     }

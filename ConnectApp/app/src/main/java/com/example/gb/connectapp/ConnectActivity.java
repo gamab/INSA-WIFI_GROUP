@@ -170,10 +170,10 @@ public class ConnectActivity extends ActionBarActivity {
 
     }
 
-    public long Evaluation_Reseau(long netID, String note, String time) {
+    public long Evaluation_Reseau(long netID, String note, String time_deb,String time_fin) {
         Log.d(TAG, "********** Evaluation_Reseau");
         // ADD Qos AND RETURN THEIR IDS
-        long qos = mBdd.addQos(note, time);
+        long qos = mBdd.addQos(note, time_deb,time_fin);
         // ENROLL Networks IN Qos
         mBdd.enrollSettingClass((int) netID, (int) qos);
 
@@ -199,9 +199,9 @@ public class ConnectActivity extends ActionBarActivity {
         long net3 = mBdd.addNetwork("JCsWiFi", "f0:72:8c:9d:7c:dd", "usxx5247");
 
         // ADD Qos AND RETURN THEIR IDS
-        long qos1 = Evaluation_Reseau(net1, "5", "16:00:00");
-        long qos2 = Evaluation_Reseau(net2, "6", "17:00:00");
-        long qos3 = Evaluation_Reseau(net2, "7", "17:00:00");
+        long qos1 = Evaluation_Reseau(net1, "5", "16:00:00", "16:10:00");
+        long qos2 = Evaluation_Reseau(net2, "6", "17:00:00", "17:20:00");
+        long qos3 = Evaluation_Reseau(net3, "7", "17:00:00", "17:30:00");
 
         mBdd.printDatabase();
     }

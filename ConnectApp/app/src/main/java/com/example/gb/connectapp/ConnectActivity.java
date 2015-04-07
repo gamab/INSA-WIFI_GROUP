@@ -40,7 +40,8 @@ public class ConnectActivity extends ActionBarActivity {
         setContentView(R.layout.connect_layout);
 
         bdd_test_wifi();
-        
+
+
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         mWifiReceiver = new WifiScanReceiver(mWifiManager);
 
@@ -51,7 +52,8 @@ public class ConnectActivity extends ActionBarActivity {
 
                 ArrayList<NetworkDesc> wifiList = mWifiReceiver.getSsidList();
 
-                NetworkDesc nd = mBdd.getNetworkByNoteFrom(wifiList);
+                //NetworkDesc nd = mBdd.getNetworkByNoteFrom(wifiList);
+                NetworkDesc nd = mBdd.getBestNetworkForCurrentTime();
 
                 if (nd != null) {
                     if (nd.getmName() != null) {
@@ -60,7 +62,7 @@ public class ConnectActivity extends ActionBarActivity {
                         Connect(nd.getmName(),nd.getmPass());
                     }
                     else {
-                        Toast.makeText(ConnectActivity.this, "Best network is hidden", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ConnectActivity.this, "No best network found", Toast.LENGTH_SHORT).show();
                     }
                 }
                 else {
@@ -146,8 +148,8 @@ public class ConnectActivity extends ActionBarActivity {
 
         // ADD Qos AND RETURN THEIR IDS
         long qos1 = mBdd.addQos("5", "16:00:00", "16:10:00");
-        long qos2 = mBdd.addQos("6", "17:00:00", "17:20:00");
-        long qos3 = mBdd.addQos("7", "17:00:00", "17:30:00");
+        long qos2 = mBdd.addQos("6", "17:00:00", "18:20:00");
+        long qos3 = mBdd.addQos("7", "17:00:00", "18:30:00");
 
         //Fait le lien entre les deux tables
         mBdd.enrollSettingClass((int) net1, (int) qos1);

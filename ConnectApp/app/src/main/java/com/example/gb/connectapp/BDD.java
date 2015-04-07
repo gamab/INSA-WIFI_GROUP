@@ -354,29 +354,45 @@ public class BDD extends SQLiteOpenHelper{
         return (result > 0);
     }
 
-
     /**
-     * Permet de récupérer le temps local de la base de données pour voir si ça fonctionne
-     * @return l'heure locale au format HH:MM:SS
+     * Permet de récupérer le meilleur réseau wifi en fonction de l'heure locale au téléphone
+     * @return une description de ce wifi
      */
-    public String getTime() {
-        Log.d(TAG,"====>METHOD FOR GETTING THE LOCAL TIME");
-        String query = "SELECT time('now');";
-        String result = null;
+    public NetworkDesc getBestNetworkForCurrentTime() {
+        Log.d(TAG,"====>METHOD FOR GETTING THE BEST NETWORK AVAILABLE FOR CURRENT TIME");
 
         SQLiteDatabase sd = getWritableDatabase();
-        Cursor cursor = sd.rawQuery(query,null);
 
+        String query = "SELECT " +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + "," +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID + "," +
+                NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
+
+        query += "FROM " + NetworkTable.TABLE_NAME
+                + " NATURAL JOIN " + JoinTable.TABLE_NAME
+                + " NATURAL JOIN " + QosTable.TABLE_NAME
+                + " ";
+
+        //Now check wifis from the list
+        query += "WHERE " +
+                "time('now','localtime') <= " + QosTable.TABLE_NAME + "." + QosTable.H_fin + " AND " +
+                "time('now','localtime') >= " + QosTable.TABLE_NAME + "." + QosTable.H_deb + " ";
+
+        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC ";
+        query += "LIMIT 1;";
+
+        Log.d(TAG,"Query is : " + query);
+
+        Cursor cursor = sd.rawQuery(query,null);
+        NetworkDesc nd = null;
+        Log.d(TAG,"Res is :");
         if (cursor.moveToNext()) {
-            if (cursor.getString(0) != null) {
-                result = cursor.getString(0);
-                Log.d(TAG, "Local Time is : " + result);
-            }
+            nd = new NetworkDesc(cursor.getString(0),cursor.getString(1),cursor.getString(2));
+
         }
 
         cursor.close();
 
-        return result;
+        return nd;
     }
-
 }

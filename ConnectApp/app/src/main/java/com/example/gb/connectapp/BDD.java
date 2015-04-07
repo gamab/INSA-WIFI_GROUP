@@ -52,7 +52,8 @@ public class BDD extends SQLiteOpenHelper{
 
         // CREATE Qos TABLE
         Log.w("====>CREATE QoS TABLE"," with ID="+QosTable.ID+"  Note="+QosTable.Note+"  Heure_deb="+QosTable.H_deb+"  Heure_fin="+QosTable.H_fin+"!!");
-        db.execSQL("CREATE TABLE " + QosTable.TABLE_NAME + " (" + QosTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+        db.execSQL("CREATE TABLE " + QosTable.TABLE_NAME + " ("
+                + QosTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + QosTable.Note + " Integer,"
                 + QosTable.H_deb + " TEXT,"
                 + QosTable.H_fin + " TEXT);");
@@ -351,6 +352,31 @@ public class BDD extends SQLiteOpenHelper{
         // THEN DELETE Network
         int result = sd.delete(NetworkTable.TABLE_NAME,NetworkTable.ID + "= ? ", whereArgs);
         return (result > 0);
+    }
+
+
+    /**
+     * Permet de récupérer le temps local de la base de données pour voir si ça fonctionne
+     * @return l'heure locale au format HH:MM:SS
+     */
+    public String getTime() {
+        Log.d(TAG,"====>METHOD FOR GETTING THE LOCAL TIME");
+        String query = "SELECT time('now');";
+        String result = null;
+
+        SQLiteDatabase sd = getWritableDatabase();
+        Cursor cursor = sd.rawQuery(query,null);
+
+        if (cursor.moveToNext()) {
+            if (cursor.getString(0) != null) {
+                result = cursor.getString(0);
+                Log.d(TAG, "Local Time is : " + result);
+            }
+        }
+
+        cursor.close();
+
+        return result;
     }
 
 }

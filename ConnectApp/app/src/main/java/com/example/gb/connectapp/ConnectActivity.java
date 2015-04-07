@@ -40,7 +40,7 @@ public class ConnectActivity extends ActionBarActivity {
         setContentView(R.layout.connect_layout);
 
         bdd_test_wifi();
-
+        
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         mWifiReceiver = new WifiScanReceiver(mWifiManager);
 
@@ -66,7 +66,6 @@ public class ConnectActivity extends ActionBarActivity {
                 else {
                     Toast.makeText(ConnectActivity.this, "Best network could not be found", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 

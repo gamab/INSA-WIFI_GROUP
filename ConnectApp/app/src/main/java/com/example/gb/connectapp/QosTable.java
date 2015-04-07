@@ -10,7 +10,7 @@ public class QosTable {
     public static final String Note = "Note" ;
 	// TimeStamp OF THE Network
     public static final String H_deb = "Heure_debut" ;
-    public static final String H_fin = "Heure_debut" ;
+    public static final String H_fin = "Heure_fin" ;
     // NAME OF THE TABLE
     public static final String TABLE_NAME = "Qos";
 

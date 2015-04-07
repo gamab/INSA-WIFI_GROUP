@@ -122,24 +122,6 @@ public class ConnectActivity extends ActionBarActivity {
         wifiManager.reconnect();
     }
 
-    public void Connect() {
-        String networkSSID = "JCsWifi2";
-        String networkPass = "MDP genial";
-        WifiConfiguration wifiConfig = new WifiConfiguration();
-        wifiConfig.SSID = String.format("\"%s\"", networkSSID);
-        wifiConfig.preSharedKey = String.format("\"%s\"", networkPass);
-        Log.d(TAG, "Configure wifi config (" + networkSSID + " | " + networkPass + ")");
-
-        //remember id
-        netId = mWifiManager.addNetwork(wifiConfig);
-        Log.d(TAG, "Disconnecting");
-        mWifiManager.disconnect();
-        Log.d(TAG, "Enabling network");
-        mWifiManager.enableNetwork(netId, true);
-        Log.d(TAG, "Connecting");
-        mWifiManager.reconnect();
-    }
-
     public void Disconnect() {
         //Log.d(TAG,"Get rid of wifi config (" + mWifiManager.getConfiguredNetworks().get(netId).SSID + " | )");
 
@@ -155,41 +137,6 @@ public class ConnectActivity extends ActionBarActivity {
         mWifiManager.startScan();
     }
 
-    public long Ajout_Reseau_BDD(String networkSSID, String networkPass) {
-        Log.d(TAG, "********** FONCTION Association_Liste_reseau");
-        // ADD Networks AND RETURN THEIR IDS
-        long net = mBdd.addNetwork(networkSSID, networkPass);
-        //Connect(networkSSID, networkPass);
-
-        return net;
-    }
-
-    public void Classement_Reseau_par_Note(long netID, int Note) {
-        Log.d(TAG, "********** FONCTION Classement_Reseau_par_Note");
-        // GET Qos Note FOR Networks AND FILTER BY Note
-
-    }
-
-    public long Evaluation_Reseau(long netID, String note, String time_deb,String time_fin) {
-        Log.d(TAG, "********** Evaluation_Reseau");
-        // ADD Qos AND RETURN THEIR IDS
-        long qos = mBdd.addQos(note, time_deb,time_fin);
-        // ENROLL Networks IN Qos
-        mBdd.enrollSettingClass((int) netID, (int) qos);
-
-        return qos;
-    }
-
-
-    public int TimeStamp_Insa() {
-        Log.d(TAG, "********** FONCTION TimeStamp_Insa");
-        String time = java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
-        if (time.equals("16:45:00")) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
 
     public void bdd_test_wifi() {
         mBdd.deleteEverything();
@@ -199,9 +146,14 @@ public class ConnectActivity extends ActionBarActivity {
         long net3 = mBdd.addNetwork("JCsWiFi", "f0:72:8c:9d:7c:dd", "usxx5247");
 
         // ADD Qos AND RETURN THEIR IDS
-        long qos1 = Evaluation_Reseau(net1, "5", "16:00:00", "16:10:00");
-        long qos2 = Evaluation_Reseau(net2, "6", "17:00:00", "17:20:00");
-        long qos3 = Evaluation_Reseau(net3, "7", "17:00:00", "17:30:00");
+        long qos1 = mBdd.addQos("5", "16:00:00", "16:10:00");
+        long qos2 = mBdd.addQos("6", "17:00:00", "17:20:00");
+        long qos3 = mBdd.addQos("7", "17:00:00", "17:30:00");
+
+        //Fait le lien entre les deux tables
+        mBdd.enrollSettingClass((int) net1, (int) qos1);
+        mBdd.enrollSettingClass((int) net2, (int) qos2);
+        mBdd.enrollSettingClass((int) net3, (int) qos3);
 
         mBdd.printDatabase();
     }

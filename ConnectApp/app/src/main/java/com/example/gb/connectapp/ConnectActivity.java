@@ -75,7 +75,7 @@ public class ConnectActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //Here put the connection code
-                Log.d(TAG, "Click sur le bouton Deconnection");
+                Log.d(TAG, "Click sur le bouton Deconnexion");
                 Disconnect();
             }
         });

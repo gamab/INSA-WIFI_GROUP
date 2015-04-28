@@ -49,25 +49,7 @@ public class ConnectActivity extends ActionBarActivity {
         mConnectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                ArrayList<NetworkDesc> wifiList = mWifiReceiver.getSsidList();
-
-                //NetworkDesc nd = mBdd.getNetworkByNoteFrom(wifiList);
-                NetworkDesc nd = mBdd.getBestNetworkForCurrentTime();
-
-                if (nd != null) {
-                    if (nd.getmName() != null) {
-                        Toast.makeText(ConnectActivity.this, "Best network is : SSID : " +
-                                nd.getmName() + " PKEY : " + nd.getmPass() + "\nConnecting.", Toast.LENGTH_SHORT).show();
-                        Connect(nd.getmName(),nd.getmPass());
-                    }
-                    else {
-                        Toast.makeText(ConnectActivity.this, "No best network found", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                else {
-                    Toast.makeText(ConnectActivity.this, "Best network could not be found", Toast.LENGTH_SHORT).show();
-                }
+                connectFromScan();
             }
         });
 
@@ -115,12 +97,18 @@ public class ConnectActivity extends ActionBarActivity {
         WifiManager wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
         //remember id
         netId = wifiManager.addNetwork(wifiConfig);
+        boolean mNetConnected = false;
         Log.d(TAG, "Disconnecting");
         wifiManager.disconnect();
-        Log.d(TAG, "Enabling network");
-        wifiManager.enableNetwork(netId, true);
-        Log.d(TAG, "Connecting");
-        wifiManager.reconnect();
+
+        while (mNetConnected == false) {
+            if (netId != -1) {
+                Log.d(TAG, "Enabling association to a previously configured Net");
+                mNetConnected = wifiManager.enableNetwork(netId, true);
+                Log.d(TAG, "Reconnecting to the currently active AP ");
+                mNetConnected = wifiManager.reconnect();
+            }
+        }
     }
 
     public void Disconnect() {
@@ -157,5 +145,23 @@ public class ConnectActivity extends ActionBarActivity {
         mBdd.enrollSettingClass((int) net3, (int) qos3);
 
         mBdd.printDatabase();
+    }
+
+    public void connectFromScan() {
+        NetworkDesc mScanNet;
+        Log.d(TAG, "********** FONCTION connectFromScan");
+        wifiScanning();
+        mScanNet = mBdd.getNetworkByNoteFrom(mWifiReceiver.getSsidList());
+
+
+        if (mScanNet.getmName() != null && mScanNet.getmBSSID() != null && mScanNet.getmPass() != null) {
+            Toast.makeText(ConnectActivity.this, "Best network is : SSID : " +
+                    mScanNet.getmName() + " PKEY : " + mScanNet.getmPass() + "\nConnecting.", Toast.LENGTH_SHORT).show();
+            Connect(mScanNet.getmName(), mScanNet.getmPass());
+        }
+        else {
+            Toast.makeText(ConnectActivity.this, "Best network is hidden or Best network could not be found", Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

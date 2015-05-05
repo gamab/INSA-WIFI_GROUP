@@ -71,8 +71,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:timeZone="GMT+0800"
-        android:format24Hour="MMM dd, yyyy k:mm" />
+        android:timeZone="GMT+0200"
+        android:format12Hour="hh:mm:ss " />
 
         <TextView
             android:id="@+id/lblResult3"
@@ -87,8 +87,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:timeZone="GMT+0800"
-        android:format24Hour="MMM dd, yyyy k:mm" />
+        android:timeZone="GMT+0200"
+        android:format12Hour="hh:mm:ss " />
     </LinearLayout>
 
     <TextView

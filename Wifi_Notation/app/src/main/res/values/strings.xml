@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">FirstAndroidView</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="wifi">SSID :</string>
+    <string name="note">Mark :</string>
+    <string name="ph">Plage_Horaire :</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="image_content_description">Un Android avec un chien</string>
+    <string name="create_account">Créer un compte</string>
+    <string name="noter_wifi">Rate me</string>
+    <string name="email">Adresse email</string>
+    <string name="password">Key :</string>
+    <string name="connect">Se connecter</string>
+    <string name="up">/\</string>
+    <string name="down">V</string>
+</resources>

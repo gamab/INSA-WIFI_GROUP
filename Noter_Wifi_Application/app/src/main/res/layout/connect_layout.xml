@@ -1,0 +1,162 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".ConnectActivity">
+
+
+    <ImageView
+        android:id="@+id/android_picture"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/ic_launcher"
+        android:contentDescription="Un Android avec un chien" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="20dp"
+        android:textSize="15sp"
+        android:text="Mark :"
+        android:textColor="#000"
+        android:layout_alignTop="@+id/ratingBar"
+        android:layout_alignLeft="@+id/l1"
+        android:layout_alignStart="@+id/l1" />
+
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:rating="0.0"
+        android:layout_marginTop="57dp"
+        android:layout_below="@+id/android_picture"
+        android:layout_alignRight="@+id/android_picture"
+        android:layout_alignEnd="@+id/android_picture" />
+
+    <TextView
+        android:id="@+id/lblResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Result : "
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_above="@+id/l1"
+        android:layout_toLeftOf="@+id/ratingBar"
+        android:layout_toStartOf="@+id/ratingBar" />
+
+    <TextView
+        android:id="@+id/txtRatingValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" tot"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_alignTop="@+id/lblResult"
+        android:layout_toRightOf="@+id/lblResult1"
+        android:layout_alignBottom="@+id/lblResult"
+        android:layout_alignRight="@+id/lblResult4"
+        android:layout_alignEnd="@+id/lblResult4" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/l1">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="20dp"
+            android:text="SSID :"
+            android:textSize="15sp"
+            android:textColor="#000" />
+        <EditText
+            android:id="@+id/user"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:layout_gravity="center" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="20dp"
+            android:textSize="15sp"
+            android:text="Key :"
+            android:textColor="#000" />
+        <EditText
+            android:id="@+id/user_password"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:inputType="textPassword" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/lblResult1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Timestamp : "
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="46dp"
+        android:layout_below="@+id/l1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <TextView
+        android:id="@+id/lblResult4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="    "
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/lblResult1"
+        android:layout_centerHorizontal="true" />
+
+    <android.widget.TextClock
+        android:id="@+id/hk_time_Deb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:timeZone="GMT+0200"
+        android:format12Hour="hh:mm:ss "
+        android:layout_above="@+id/lblResult4"
+        android:layout_toRightOf="@+id/lblResult1"
+        android:layout_toEndOf="@+id/lblResult1" />
+
+    <TextView
+        android:id="@+id/lblResult3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="   -   "
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_alignTop="@+id/hk_time_Deb"
+        android:layout_toRightOf="@+id/hk_time_Deb"
+        android:layout_toEndOf="@+id/hk_time_Deb" />
+
+    <android.widget.TextClock
+        android:id="@+id/hk_time_Fin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:timeZone="GMT+0200"
+        android:format12Hour="hh:mm:ss "
+        android:layout_alignTop="@+id/hk_time_Deb"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rate me"
+        android:id="@+id/btnSubmit"
+        android:layout_below="@+id/lblResult4"
+        android:layout_toRightOf="@+id/lblResult1"
+        android:layout_toEndOf="@+id/lblResult1" />
+
+</RelativeLayout>

@@ -203,9 +203,10 @@ public class BDD extends SQLiteOpenHelper{
                 QosTable.TABLE_NAME + "." + QosTable.H_fin + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
-                + " NATURAL JOIN " + JointureTable.TABLE_NAME
-                + " NATURAL JOIN " + QosTable.TABLE_NAME
-                + " ";
+                + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
+                + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
+                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
 
         query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
 
@@ -239,9 +240,10 @@ public class BDD extends SQLiteOpenHelper{
                 NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
         query += "FROM " + NetworkTable.TABLE_NAME
-                + " NATURAL JOIN " + JointureTable.TABLE_NAME
-                + " NATURAL JOIN " + QosTable.TABLE_NAME
-                + " ";
+                + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
+                + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
+                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
         query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
 
         Cursor cursor = sd.rawQuery(query,null);
@@ -274,9 +276,10 @@ public class BDD extends SQLiteOpenHelper{
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
-                + " NATURAL JOIN " + JointureTable.TABLE_NAME
-                + " NATURAL JOIN " + QosTable.TABLE_NAME
-                + " ";
+                + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
+                + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
+                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
 
         //Now check wifis from the list
         query += "WHERE ";
@@ -369,9 +372,10 @@ public class BDD extends SQLiteOpenHelper{
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
-                + " NATURAL JOIN " + JointureTable.TABLE_NAME
-                + " NATURAL JOIN " + QosTable.TABLE_NAME
-                + " ";
+                + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
+                + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
+                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
 
         //Now check wifis from the list
         query += "WHERE " +

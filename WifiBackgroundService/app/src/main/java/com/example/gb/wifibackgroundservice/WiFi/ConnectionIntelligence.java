@@ -112,14 +112,16 @@ public class ConnectionIntelligence {
         long net3 = mBdd.addNetwork("JCsWiFi", "f0:72:8c:9d:7c:dd", "usxx5247");
 
         // ADD Qos AND RETURN THEIR IDS
-        long qos1 = mBdd.addQos("5", "16:00:00", "16:10:00");
-        long qos2 = mBdd.addQos("6", "17:00:00", "18:20:00");
-        long qos3 = mBdd.addQos("7", "17:00:00", "18:30:00");
+        long qos1 = mBdd.addQos("3", "13:20:00", "16:10:00");
+        long qos2 = mBdd.addQos("2", "08:30:00", "09:35:00");
+        long qos3 = mBdd.addQos("3", "08:35:00", "08:40:00");
+        long qos4 = mBdd.addQos("4", "14:00:00", "18:56:00");
 
         //Links both tables
         mBdd.enrollSettingClass((int) net1, (int) qos1);
         mBdd.enrollSettingClass((int) net2, (int) qos2);
         mBdd.enrollSettingClass((int) net3, (int) qos3);
+        mBdd.enrollSettingClass((int) net3, (int) qos4);
 
         mBdd.printDatabase();
     }
@@ -151,7 +153,7 @@ public class ConnectionIntelligence {
         net = mBdd.getBestNetworkForCurrentTime();
 
 
-        if (net.getmSsid() != null && net.getmBSSID() != null && net.getmPass() != null) {
+        if (net != null && net.getmSsid() != null && net.getmBSSID() != null && net.getmPass() != null) {
             //if it is not the last wifi to which we already connected
             if (areWeConnectedTo(net)) {
                 Log.d(TAG, "Already connected to the best wifi");
@@ -161,6 +163,10 @@ public class ConnectionIntelligence {
                 return net.getmSsid();
             }
         }
+        else if (net == null) {
+            Log.d(TAG,"Could not retrieve wifi for this time from the database.");
+        }
+
         return null;
     }
 

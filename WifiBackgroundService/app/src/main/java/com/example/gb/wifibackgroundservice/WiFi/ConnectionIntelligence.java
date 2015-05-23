@@ -107,18 +107,15 @@ public class ConnectionIntelligence {
     public void bdd_test_wifi() {
         mBdd.deleteEverything();
 
-        long net1 = mBdd.addNetwork("Yann Mb", "36:5a:05:a4:de:67", "pass12345__");
-        long net2 = mBdd.addNetwork("gifi", "f8:e0:79:3d:33:3c", "pass12345__");
-        long net3 = mBdd.addNetwork("JCsWiFi", "f0:72:8c:9d:7c:dd", "usxx5247");
+        long net2 = mBdd.addNetwork("gauche_AP", "f8:e0:79:3d:33:3c", "pass12345__");
+        long net3 = mBdd.addNetwork("droite_AP", "f0:72:8c:9d:7c:dd", "usxx5247");
 
         // ADD Qos AND RETURN THEIR IDS
-        long qos1 = mBdd.addQos("3", "13:20:00", "16:10:00");
-        long qos2 = mBdd.addQos("2", "08:30:00", "09:35:00");
-        long qos3 = mBdd.addQos("3", "08:35:00", "08:40:00");
-        long qos4 = mBdd.addQos("4", "14:00:00", "18:56:00");
+        long qos2 = mBdd.addQos("3", "18:00:00", "20:00:00");
+        long qos3 = mBdd.addQos("4", "18:25:00", "18:26:00");
+        long qos4 = mBdd.addQos("2", "18:28:00", "18:30:00");
 
         //Links both tables
-        mBdd.enrollSettingClass((int) net1, (int) qos1);
         mBdd.enrollSettingClass((int) net2, (int) qos2);
         mBdd.enrollSettingClass((int) net3, (int) qos3);
         mBdd.enrollSettingClass((int) net3, (int) qos4);

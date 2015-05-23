@@ -23,7 +23,8 @@
         android:textColor="#000"
         android:layout_alignTop="@+id/ratingBar"
         android:layout_alignLeft="@+id/l1"
-        android:layout_alignStart="@+id/l1" />
+        android:layout_alignStart="@+id/l1"
+        android:id="@+id/textView" />
 
     <RatingBar
         android:id="@+id/ratingBar"
@@ -69,7 +70,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:paddingTop="20dp"
             android:text="SSID :"
             android:textSize="15sp"
@@ -96,6 +96,7 @@
             android:layout_gravity="center"
             android:inputType="textPassword"
             android:textColor="#ffff3511" />
+
     </LinearLayout>
 
     <TextView
@@ -117,14 +118,16 @@
         android:layout_below="@+id/lblResult1"
         android:layout_centerHorizontal="true" />
 
-    <android.widget.TextClock
+    <EditText
         android:id="@+id/hk_time_Deb"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:inputType="text"
         android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:timeZone="GMT+0200"
-        android:format12Hour="hh:mm:ss "
+        android:text="12:34:56"
+        android:format12Hour="hh:mm:ss"
         android:layout_above="@+id/lblResult4"
         android:layout_toRightOf="@+id/lblResult1"
         android:layout_toEndOf="@+id/lblResult1"
@@ -141,14 +144,16 @@
         android:layout_toLeftOf="@+id/hk_time_Fin"
         android:layout_toStartOf="@+id/hk_time_Fin" />
 
-    <android.widget.TextClock
+    <EditText
         android:id="@+id/hk_time_Fin"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:inputType="text"
         android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:timeZone="GMT+0200"
-        android:format12Hour="hh:mm:ss "
+        android:text="23:34:45"
+        android:format12Hour="hh:mm:ss"
         android:layout_alignTop="@+id/hk_time_Deb"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
@@ -164,5 +169,30 @@
         android:layout_toEndOf="@+id/lblResult1"
         android:layout_marginBottom="52dp"
         android:background="#ffa8d75b" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="20dp"
+        android:textSize="15sp"
+        android:text="BSSID :"
+        android:textColor="#000"
+        android:id="@+id/bssid"
+        android:layout_below="@+id/l1"
+        android:layout_alignLeft="@+id/l1"
+        android:layout_alignStart="@+id/l1" />
+
+    <EditText
+        android:id="@+id/user_bssid"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:inputType="text"
+        android:textColor="#ffff3511"
+        android:text="1a:2b:3c:4d:5e:6f"
+        android:layout_above="@+id/hk_time_Deb"
+        android:layout_toRightOf="@+id/textView"
+        android:layout_toEndOf="@+id/textView" />
 
 </RelativeLayout>

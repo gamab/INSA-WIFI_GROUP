@@ -16,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MarkActivity extends ActionBarActivity {
 
@@ -24,14 +26,12 @@ public class MarkActivity extends ActionBarActivity {
     private Button mConnectBtn;
     private RatingBar ratingBar;
     private TextView ssid;
+    private TextView bssid;
     private TextView key;
     private TextView txtRatingValue;
     private TextView t_Debut;
     private TextView t_Fin;
-    private String bssid ="";
     private BDD mBdd = new BDD(this);
-    private WifiManager mWifiManager;
-    WifiScanReceiver mWifiReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +39,9 @@ public class MarkActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_mark);
 
-        mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-        mWifiReceiver = new WifiScanReceiver(mWifiManager);
-
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
         ssid = (TextView) findViewById(R.id.user);
+        bssid = (TextView) findViewById(R.id.user_bssid);
         key = (TextView) findViewById(R.id.user_password);
         txtRatingValue = (TextView) findViewById(R.id.txtRatingValue);
         t_Debut = (TextView) findViewById(R.id.hk_time_Deb);
@@ -87,48 +85,59 @@ public class MarkActivity extends ActionBarActivity {
     }
 
 
-
-    public void wifiScanning() {
-        Log.d(TAG, "Scanning Nets");
-        registerReceiver(mWifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        mWifiManager.startScan();
-    }
-
-    public void getInformation()
-    {
-        wifiScanning();
-        List<ScanResult> wifiScanList = mWifiManager.getScanResults();
-        for (int i = 0; i < wifiScanList.size(); i++)
-        {
-            if(ssid.getText().toString().equals(wifiScanList.get(i).SSID))
-            {
-                bssid=""+wifiScanList.get(i).BSSID;
-                Log.w(TAG, "found bssid :"+bssid);
-            }
-
-        }
-        if(bssid.equals(""))
-        {
-            Log.w(TAG, "not found bssid");
-        }
-    }
-
     public void rateMe()
     {
         Log.d(TAG, "********** rateMe ***********");
         mBdd.deleteEverything();
+        String h_deb = checkHour(t_Debut.getText().toString());
+        String h_fin = checkHour(t_Fin.getText().toString());
+        String the_bssid = checkbssid(bssid.getText().toString());
 
-        getInformation();
+        if (h_deb == null) {
+            Toast.makeText(MarkActivity.this,"Time deb is not good",Toast.LENGTH_LONG).show();
+        }
+        else if (h_fin == null) {
+            Toast.makeText(MarkActivity.this,"Time fin is not good",Toast.LENGTH_LONG).show();
+        }
+        else if (the_bssid == null) {
+            Toast.makeText(MarkActivity.this,"Bssid is not good (ex : 1a:2b:3c:4d:5e:6f)",Toast.LENGTH_LONG).show();
+        }
+        else {
+            // ADD NETWORK AND RETURN ITS ID
+            long net1 = mBdd.addNetwork(ssid.getText().toString(), the_bssid, key.getText().toString());
+            // ADD Qos AND RETURN ITS ID
+            long qos1 = mBdd.addQos(txtRatingValue.getText().toString(), h_deb, h_fin);
+            //Fait le lien entre les deux tables
+            mBdd.enrollSettingClass((int) net1, (int) qos1);
+            //Print DataBase
+            mBdd.printDatabase();
 
-        // ADD NETWORK AND RETURN ITS ID
-        long net1 = mBdd.addNetwork(ssid.getText().toString(), bssid, key.getText().toString());
-        // ADD Qos AND RETURN ITS ID
-        long qos1 = mBdd.addQos(txtRatingValue.getText().toString(), t_Debut.getText().toString(), t_Fin.getText().toString());
-        //Fait le lien entre les deux tables
-        mBdd.enrollSettingClass((int) net1, (int) qos1);
-        //Print DataBase
-        mBdd.printDatabase();
+            Toast.makeText(MarkActivity.this, "Well Done.", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        Toast.makeText(MarkActivity.this, "Well Done.", Toast.LENGTH_SHORT).show();
+    public String checkHour(String heure) {
+        Pattern hourPat1 = Pattern.compile("([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]");
+
+        Matcher match1 = hourPat1.matcher(heure);
+        if (match1.find()) {
+            Log.d(TAG,"Found pattern 1 in hour");
+            return match1.group(0);
+        }
+        Log.d(TAG,"Hour does not seem to be good");
+        return null;
+    }
+
+    public String checkbssid(String bssid) {
+        Log.d(TAG, "Checking out bssid : " + bssid);
+        Pattern bssidPat = Pattern.compile("^(([0-9a-f]){2}[:]){5}([0-9a-f]){2}$");
+
+        Matcher match1 = bssidPat.matcher(bssid);
+        if (match1.find()) {
+            Log.d(TAG,"Found pattern 1 in bssid");
+            return match1.group(0);
+        }
+        Log.d(TAG,"bssid does not seem to be good");
+        return null;
     }
 }

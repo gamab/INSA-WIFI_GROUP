@@ -22,7 +22,7 @@ public class BDD extends SQLiteOpenHelper{
 
     private static final String TAG = "BDD";
     private static final String TAG1 = "Network --";
-    private static final String TAG2 = "Qos --";
+    private static final String TAG2 = "Qoe --";
     private static final String TAG3 = "Jointure --";
 
     public BDD(Context context)
@@ -51,20 +51,20 @@ public class BDD extends SQLiteOpenHelper{
                 + NetworkTable.PresharedKey + " TEXT);");
 
         // CREATE Qos TABLE
-        Log.w("====>CREATE QoS TABLE"," with ID="+QosTable.ID+"  Note="+QosTable.Note+"  Heure_deb="+QosTable.H_deb+"  Heure_fin="+QosTable.H_fin+"!!");
-        db.execSQL("CREATE TABLE " + QosTable.TABLE_NAME + " ("
-                + QosTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + QosTable.Note + " Integer,"
-                + QosTable.H_deb + " TEXT,"
-                + QosTable.H_fin + " TEXT);");
+        Log.w("====>CREATE QoS TABLE"," with ID="+ QoeTable.ID+"  Note="+ QoeTable.Note+"  Heure_deb="+ QoeTable.H_deb+"  Heure_fin="+ QoeTable.H_fin+"!!");
+        db.execSQL("CREATE TABLE " + QoeTable.TABLE_NAME + " ("
+                + QoeTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + QoeTable.Note + " Integer,"
+                + QoeTable.H_deb + " TEXT,"
+                + QoeTable.H_fin + " TEXT);");
 
         // CREATE Join MAPPING TABLE
-        Log.w("====>CREATE Join MAPPING TABLE"," with ID="+ JointureTable.ID+"  Network_ID="+ JointureTable.Network_ID+"  Qos_ID="+ JointureTable.Qos_ID+"!!");
+        Log.w("====>CREATE Join MAPPING TABLE"," with ID="+ JointureTable.ID+"  Network_ID="+ JointureTable.Network_ID+"  Qos_ID="+ JointureTable.Qoe_ID+"!!");
         db.execSQL("CREATE TABLE " + JointureTable.TABLE_NAME + " (" + JointureTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + JointureTable.Network_ID + " INTEGER,"
-                + JointureTable.Qos_ID + " INTEGER,"
+                + JointureTable.Qoe_ID + " INTEGER,"
                 +"FOREIGN KEY ( "+ JointureTable.Network_ID+") REFERENCES "+NetworkTable.TABLE_NAME+" ("+NetworkTable.ID+"),"
-                +"FOREIGN KEY ( "+ JointureTable.Qos_ID+") REFERENCES "+QosTable.TABLE_NAME+" ("+QosTable.ID+"));");
+                +"FOREIGN KEY ( "+ JointureTable.Qoe_ID+") REFERENCES "+ QoeTable.TABLE_NAME+" ("+ QoeTable.ID+"));");
     }
 
     /**
@@ -79,7 +79,7 @@ public class BDD extends SQLiteOpenHelper{
         Log.w("====>LOG_TAG", "Upgrading database from version " + oldVersion + " to " + newVersion + ",which will destroy all old data");
         // KILL PREVIOUS TABLES IF UPGRADED
         db.execSQL("DROP TABLE IF EXISTS " + NetworkTable.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + QosTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + QoeTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + JointureTable.TABLE_NAME);
         // CREATE NEW INSTANCE OF SCHEMA
         onCreate(db);
@@ -155,11 +155,11 @@ public class BDD extends SQLiteOpenHelper{
     {
         Log.w("====>WRAPPER METHOD FOR ADDING A Qos"," with Note="+note+"  Time_deb="+time_deb+"  Time_fin="+time_fin+"!!");
         ContentValues cv = new ContentValues();
-        cv.put(QosTable.Note, note);
-        cv.put(QosTable.H_deb, time_deb);
-        cv.put(QosTable.H_fin, time_fin);
+        cv.put(QoeTable.Note, note);
+        cv.put(QoeTable.H_deb, time_deb);
+        cv.put(QoeTable.H_fin, time_fin);
         SQLiteDatabase sd = getWritableDatabase();
-        long result = sd.insert(QosTable.TABLE_NAME,null, cv);
+        long result = sd.insert(QoeTable.TABLE_NAME,null, cv);
 
         return result;
     }
@@ -178,9 +178,9 @@ public class BDD extends SQLiteOpenHelper{
         Log.w("====>WRAPPER METHOD FOR ENROLLING A Setting INTO A Network"," with Network_ID="+netId+"  Qos_ID="+qosId+"!!");
         ContentValues cv = new ContentValues();
         cv.put(JointureTable.Network_ID, netId);
-        cv.put(JointureTable.Qos_ID, qosId);
+        cv.put(JointureTable.Qoe_ID, qosId);
         SQLiteDatabase sd = getWritableDatabase();
-        long result = sd.insert(JointureTable.TABLE_NAME, JointureTable.Qos_ID, cv);
+        long result = sd.insert(JointureTable.TABLE_NAME, JointureTable.Qoe_ID, cv);
 
         return (result >= 0);
     }
@@ -197,18 +197,18 @@ public class BDD extends SQLiteOpenHelper{
                 NetworkTable.TABLE_NAME + "." + NetworkTable.SSID + ", " +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID + ", " +
                 NetworkTable.TABLE_NAME + "." + NetworkTable.PresharedKey + ", "+
-                QosTable.TABLE_NAME + "." + QosTable.ID + ", "+
-                QosTable.TABLE_NAME + "." + QosTable.Note + ", "+
-                QosTable.TABLE_NAME + "." + QosTable.H_deb + ", "+
-                QosTable.TABLE_NAME + "." + QosTable.H_fin + " ";
+                QoeTable.TABLE_NAME + "." + QoeTable.ID + ", "+
+                QoeTable.TABLE_NAME + "." + QoeTable.Note + ", "+
+                QoeTable.TABLE_NAME + "." + QoeTable.H_deb + ", "+
+                QoeTable.TABLE_NAME + "." + QoeTable.H_fin + " ";
 
         query += "FROM " + NetworkTable.TABLE_NAME
                 + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
                 + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
-                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
-                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
+                + " LEFT JOIN " + QoeTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qoe_ID + "=" + QoeTable.TABLE_NAME + "." + QoeTable.ID + " ";
 
-        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
+        query += "ORDER BY " + QoeTable.TABLE_NAME + "." + QoeTable.Note + " DESC;";
 
         Cursor cursor = sd.rawQuery(query,null);
         Log.d(TAG, "ID_Network  ||  SSID  ||  BSSID  ||  Presharedkey  ||  ID_Qos  ||  Note ||  Heure_deb  ||  Heure_fin ");
@@ -242,9 +242,9 @@ public class BDD extends SQLiteOpenHelper{
         query += "FROM " + NetworkTable.TABLE_NAME
                 + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
                 + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
-                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
-                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
-        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
+                + " LEFT JOIN " + QoeTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qoe_ID + "=" + QoeTable.TABLE_NAME + "." + QoeTable.ID + " ";
+        query += "ORDER BY " + QoeTable.TABLE_NAME + "." + QoeTable.Note + " DESC;";
 
         Cursor cursor = sd.rawQuery(query,null);
         if (cursor.moveToNext()) {
@@ -278,8 +278,8 @@ public class BDD extends SQLiteOpenHelper{
         query += "FROM " + NetworkTable.TABLE_NAME
                 + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
                 + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
-                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
-                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
+                + " LEFT JOIN " + QoeTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qoe_ID + "=" + QoeTable.TABLE_NAME + "." + QoeTable.ID + " ";
 
         //Now check wifis from the list
         query += "WHERE ";
@@ -297,7 +297,7 @@ public class BDD extends SQLiteOpenHelper{
                 " AND " + NetworkTable.TABLE_NAME + "." + NetworkTable.BSSID + "=\"" + curNd.getmBSSID() + "\") ";
 
 
-        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC;";
+        query += "ORDER BY " + QoeTable.TABLE_NAME + "." + QoeTable.Note + " DESC;";
 
         Log.d(TAG,"Query is : " + query);
 
@@ -328,9 +328,9 @@ public class BDD extends SQLiteOpenHelper{
                         String.valueOf(qosId)
                 };
         // DELETE ALL CLASS MAPPINGS Setting Qos IS SIGNED UP FOR
-        sd.delete(JointureTable.TABLE_NAME, JointureTable.Qos_ID + "= ? ", whereArgs);
+        sd.delete(JointureTable.TABLE_NAME, JointureTable.Qoe_ID + "= ? ", whereArgs);
         // THEN DELETE QOS
-        int result = sd.delete(QosTable.TABLE_NAME,QosTable.ID + "= ? ", whereArgs);
+        int result = sd.delete(QoeTable.TABLE_NAME, QoeTable.ID + "= ? ", whereArgs);
         return (result > 0);
     }
 
@@ -374,15 +374,15 @@ public class BDD extends SQLiteOpenHelper{
         query += "FROM " + NetworkTable.TABLE_NAME
                 + " LEFT JOIN " + JointureTable.TABLE_NAME + " ON "
                 + NetworkTable.TABLE_NAME + "." + NetworkTable.ID + "=" + JointureTable.TABLE_NAME + "." +JointureTable.Network_ID + " "
-                + " LEFT JOIN " + QosTable.TABLE_NAME + " ON "
-                + JointureTable.TABLE_NAME + "." + JointureTable.Qos_ID + "=" + QosTable.TABLE_NAME + "." +QosTable.ID + " ";
+                + " LEFT JOIN " + QoeTable.TABLE_NAME + " ON "
+                + JointureTable.TABLE_NAME + "." + JointureTable.Qoe_ID + "=" + QoeTable.TABLE_NAME + "." + QoeTable.ID + " ";
 
         //Now check wifis from the list
         query += "WHERE " +
-                "time('now','localtime') <= " + QosTable.TABLE_NAME + "." + QosTable.H_fin + " AND " +
-                "time('now','localtime') >= " + QosTable.TABLE_NAME + "." + QosTable.H_deb + " ";
+                "time('now','localtime') <= " + QoeTable.TABLE_NAME + "." + QoeTable.H_fin + " AND " +
+                "time('now','localtime') >= " + QoeTable.TABLE_NAME + "." + QoeTable.H_deb + " ";
 
-        query += "ORDER BY " + QosTable.TABLE_NAME + "." + QosTable.Note + " DESC ";
+        query += "ORDER BY " + QoeTable.TABLE_NAME + "." + QoeTable.Note + " DESC ";
         query += "LIMIT 1;";
 
         Log.d(TAG,"Query is : " + query);

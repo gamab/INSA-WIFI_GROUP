@@ -11,7 +11,7 @@ public class JointureTable {
     // THE ID OF THE STUDENT
     public static final String Network_ID = "Network_id";
     // THE ID OF ASSOCIATED COURSE
-    public static final String Qos_ID = "Qos_id";
+    public static final String Qoe_ID = "Qoe_id";
     // THE NAME OF THE TABLE
     public static final String TABLE_NAME = "Jointure";
 }
